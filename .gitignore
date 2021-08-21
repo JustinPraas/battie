@@ -1,5 +1,5 @@
 node_modules/
 build/
 
-packag-lock.json
+package-lock.json
 djs-key.ts

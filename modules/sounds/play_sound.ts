@@ -3,10 +3,13 @@ import * as path from "path";
 import * as fs from "fs";
 import { SOUND_FILES_DIR_REL_PATH } from "./sounds-module";
 
+const COMMAND = "play"
+const SUPPORTED_FILETYPES = ["mp3", "mp4", "wav"]
+
 export const playSound: Command = {
-    name: "play_sound",
-    format: "play_sound <sound name>",
-    description: "Speelt het geluid af met 'sound name'.",
+    name: `${COMMAND}`,
+    format: `${COMMAND} <sound name>`,
+    description: "Speelt het geluid af met <sound name>.",
     execute(message, args) {
         if (!message.member?.voice.channel)
             return message.reply("Je moet in een spraak-kanaal zitten");
@@ -16,13 +19,28 @@ export const playSound: Command = {
             return message.reply("Ik ben al aan het afspelen");
 
         try {
-            const filePath = path.join(
-                __dirname,
-                SOUND_FILES_DIR_REL_PATH,
-                args.shift()!
-            );
+            const specifiedSound = args.shift()!
 
-            if (fs.existsSync(filePath)) {
+            let filePath: string = "";
+            let fileExists: boolean = false;
+            for (let i = 0; i < SUPPORTED_FILETYPES.length; i++) {
+
+                // Construct potential filepath
+                filePath = path.join(
+                    __dirname,
+                    SOUND_FILES_DIR_REL_PATH,
+                    `${specifiedSound}.${SUPPORTED_FILETYPES[i]}`
+                );
+
+                // If file exists, break
+                if (fs.existsSync(filePath)) {
+                    fileExists = true;
+                    break;
+                }
+            }
+            
+
+            if (fileExists) {
                 // Joining the channel and creating a VoiceConnection.
                 message.member.voice.channel
                     .join()
@@ -35,7 +53,7 @@ export const playSound: Command = {
                     })
                     .catch((e) => console.log(e));
             } else {
-                message.reply(`je opgegeven bestand ${args} bestaat niet`);
+                message.reply(`Je gevraagde sound '${specifiedSound}' bestaat niet`);
             }
         } catch (err) {
             console.error(err);

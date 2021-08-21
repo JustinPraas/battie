@@ -1,23 +1,25 @@
 import { Command } from "../../models/Command";
 
+const COMMAND = "add-role"
+
 export const addRole: Command = {
-    name: "add_role",
-    format: "add_role <@user> <role-name>",
+    name: COMMAND,
+    format: `${COMMAND} <@user> <role-name>`,
     description: "Voegt de betreffende rol toe aan de aangegeven gebruiker.",
     execute(message, args) {
-        const member = message.mentions.members?.first();
-        const rol = args.slice(1);
-        const rol_str = rol.join(" ");
+        const specifiedMember = message.mentions.members?.first();
+        const specifiedRole = args.slice(1);
+        const rol_str = specifiedRole.join(" ");
         const role = message.guild?.roles.cache.find((r) => r.name === rol_str);
-
-        if (!member) {
+ 
+        if (!specifiedMember) {
             message.channel.send("Er zijn geen members getagged.");
             return;
         }
 
         if (!role) {
             message.channel.send(
-                `de role ${rol_str} die je wilt toewijzen bestaat niet`
+                `De role ${rol_str} die je wilt toewijzen bestaat niet`
             );
             return;
         } else {
@@ -26,15 +28,15 @@ export const addRole: Command = {
                 rol_str === "Mod" ||
                 rol_str == "Battie"
             ) {
-                message.channel.send(`dat gaan we dus niet doen....`);
+                message.channel.send(`Dat gaan we dus niet doen...`);
             } else {
-                if (member.roles.cache.some((r) => r.name === role.name)) {
-                    message.channel.send(`je hebt de role ${rol_str} al`);
+                if (specifiedMember.roles.cache.some((r) => r.name === role.name)) {
+                    message.channel.send(`Je hebt de role ${rol_str} al`);
                 } else {
                     message.channel.send(
-                        `als het goed is heb je de role ${rol_str} nu`
+                        `Als het goed is heb je de role ${rol_str} nu`
                     );
-                    member.roles.add(role);
+                    specifiedMember.roles.add(role);
                 }
             }
         }
