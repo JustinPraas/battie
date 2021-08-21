@@ -6,8 +6,8 @@ const COMMAND = "roll"
 export const roll: Command = {
     name: COMMAND,
     format: `${COMMAND} [X] [Y]`,
-    description: "Rolt een willekeurig getal tussen [1, 100].\n\t" + 
-        "Als `x` is meegegeven, rolt een willekeurig getal in [1, `x`]\n\t" +
+    description: "Rolt een willekeurig getal tussen [1, 100].\n\t\t\t\t" + 
+        "Als `x` is meegegeven, rolt een willekeurig getal in [1, `x`]\n\t\t\t\t" +
         "Als `y` ook is meegegeven, rolt een willekeurig getal tussen [`x`, `y`]",
     execute(message, args) {
 

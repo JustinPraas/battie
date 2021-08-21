@@ -36,7 +36,8 @@ export const helpCommand: Command = {
             printString += `Voor een uitgebruid overzicht van de verschillende commands, gebruik ${COMMAND_PREFIX}help <command_name>\n\n`;
 
             commandList.forEach((c) => {
-                printString += `${c.name}\n`;
+                const paddedCommandName = c.name.padEnd(15)
+                printString += `${paddedCommandName}${c.description}\n`;
             });
 
             printString += "```";
