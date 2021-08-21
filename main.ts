@@ -3,6 +3,7 @@ import { Command } from "./models/Command";
 import { helpCommand } from "./modules/help";
 import { rolesCommands } from "./modules/roles/roles-module";
 import { soundsCommands } from "./modules/sounds/sounds-module";
+import { utilityCommands } from "./modules/utilities/utilities-module";
 
 require('dotenv').config({path:__dirname + '../../environment.env'})
 
@@ -22,6 +23,7 @@ export const commandList: Command[] = [
     helpCommand,
     ...rolesCommands,
     ...soundsCommands,
+    ...utilityCommands
 ];
 
 // Make a collection of all the commands the server should handle
