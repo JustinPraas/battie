@@ -13,7 +13,7 @@ export const getSound: Command = {
     execute(message, _) {
         const files = fs.readdirSync(path.join(__dirname, SOUND_FILES_DIR_REL_PATH)).map(file => file.split(".")[0]);
         message.channel.send(
-            `Hier een lijst met beschikbare sounds. Typ \`${COMMAND_PREFIX}play <filenaam}>\` om er een af te spelen`
+            `Hier een lijst met beschikbare sounds. Typ \`${COMMAND_PREFIX}play <filenaam>\` om er een af te spelen`
         );
         message.channel.send(files);
     },

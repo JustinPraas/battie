@@ -5,7 +5,7 @@ const COMMAND = "roulette"
 
 export const userRoulette: Command = {
     name: COMMAND,
-    format: `${COMMAND} [@user1] [@user2] ...`,
+    format: `\`${COMMAND} [@user1] [@user2] ...\` of \`${COMMAND} [naam1] [naam2]...\``,
     description: "Kiest een willekeurige gebruiker uit de aangegeven lijst van gebruikers.",
     execute(message, args) {
         
@@ -13,11 +13,13 @@ export const userRoulette: Command = {
 
         if (users) {
             if (users.size == 0) {
-                message.channel.send("Uuuh.. niemand is gementioned?")
+                const names = args
+                const chosenName = names[Math.floor(Math.random() * names.length)];
+                sendMessageStrings(message, chosenName);
             } else {
                 const usersArray = users.map(gm => gm.user);
                 const chosenUser = usersArray[Math.floor(Math.random() * usersArray.length)];
-                sendMessage(message, chosenUser);
+                sendMessageMentions(message, chosenUser);
             }
         } else {
             message.channel.send("Er is wat fout gegaan en ik heb geen idee wat. Probeer het opnieuw questionmark?")
@@ -25,24 +27,30 @@ export const userRoulette: Command = {
     },
 };
 
-function sendMessage(message: Message, chosenUser: User) {
-    const listOfVariants = [messageVariant1, messageVariant2, messageVariant3]
-    const chosenVariant = listOfVariants[Math.floor(Math.random() * listOfVariants.length)];
-    message.channel.send(chosenVariant(chosenUser));
+function sendMessageStrings(message: Message, chosenPerson: string) {
+    message.channel.send(getMessageVariant()(chosenPerson));
 }
 
-const messageVariant1 = (chosenUser: User): string => {
-    return `Jaja, ${getMention(chosenUser)} is de gelukkige!`
+function sendMessageMentions(message: Message, chosenUser: User) {
+    message.channel.send(getMessageVariant()(getMention(chosenUser)));
 }
 
-const messageVariant2 = (chosenUser: User): string => {
-    return `${getMention(chosenUser)} mag de afwas doen.`
+const getMessageVariant = () => MESSAGE_VARIANTS[Math.floor(Math.random() * MESSAGE_VARIANTS.length)];
+
+const messageVariant1 = (chosenName: string): string => {
+    return `Jaja, ${chosenName} is de gelukkige!`
 }
 
-const messageVariant3 = (chosenUser: User): string => {
-    return `${getMention(chosenUser)} heeft gewonnen. Hoppa`
+const messageVariant2 = (chosenName: string): string => {
+    return `${chosenName} mag de afwas doen.`
+}
+
+const messageVariant3 = (chosenName: string): string => {
+    return `${chosenName} heeft gewonnen. Hoppa`
 }
 
 const getMention = (author: User) => {
     return `<@${author}>`
 }
+
+const MESSAGE_VARIANTS = [messageVariant1, messageVariant2, messageVariant3]
