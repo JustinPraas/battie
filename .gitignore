@@ -3,3 +3,4 @@ build/
 
 package-lock.json
 djs-key.ts
+environment.env

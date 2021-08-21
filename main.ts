@@ -4,7 +4,9 @@ import { helpCommand } from "./modules/help";
 import { rolesCommands } from "./modules/roles/roles-module";
 import { soundsCommands } from "./modules/sounds/sounds-module";
 
-const ACCESS_TOKEN = "ODc4MzU4NTAyMjExNDYxMTgw.YSABGg.zvrPdR_qPvWwAM4gULjyG5Ghqf8";
+require('dotenv').config({path:__dirname + '../../environment.env'})
+
+const ACCESS_TOKEN = process.env.DISCORD_KEY;
 
 // const isProductionEnv = process.env.NODE_ENV === "production";
 
