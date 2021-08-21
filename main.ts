@@ -34,6 +34,7 @@ commandList.forEach((command) => commands.set(command.name, command));
 
 client.once("ready", () => {
     client.user?.setUsername(`Battiebot`);
+    client.user?.setActivity("revi dc", {type: "WATCHING"})
     console.log("Battiebot is aanwezig");
 });
 

@@ -6,9 +6,9 @@ const COMMAND = "roll"
 export const roll: Command = {
     name: COMMAND,
     format: `${COMMAND} [X] [Y]`,
-    description: "Rolt een willekeurig getal tussen 0 en 100.\n\t" + 
-        "Als `x` is meegegeven, rolt een willekeurig getal tussen 0 en `x`\n\t" +
-        "Als `y` ook is meegegeven, rolt een willekeurig getal tussen `x` en `y`",
+    description: "Rolt een willekeurig getal tussen [1, 100].\n\t" + 
+        "Als `x` is meegegeven, rolt een willekeurig getal in [1, `x`]\n\t" +
+        "Als `y` ook is meegegeven, rolt een willekeurig getal tussen [`x`, `y`]",
     execute(message, args) {
 
         const author: User = message.author;
@@ -18,9 +18,9 @@ export const roll: Command = {
         if (validInputs(x, y)) {
             let number = 0;
             if (x == null && y == null) {
-                number = rollRandomNumber(0, 100);
+                number = rollRandomNumber(1, 100);
             } else if (x != null && y == null) {
-                number = rollRandomNumber(0, parseInt(x));
+                number = rollRandomNumber(1, parseInt(x));
             } else if (x != null && y != null) {
                 number = rollRandomNumber(parseInt(x), parseInt(y));
             }
