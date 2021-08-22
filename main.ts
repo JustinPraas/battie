@@ -2,6 +2,7 @@ import Discord from "discord.js";
 import { Command } from "./models/Command";
 import { helpCommand } from "./modules/help";
 import { rolesCommands } from "./modules/roles/roles-module";
+import { currentActivity, startSchedulingNewActivites } from "./modules/scheduling/activity_changer";
 import { soundsCommands } from "./modules/sounds/sounds-module";
 import { utilityCommands } from "./modules/utilities/utilities-module";
 
@@ -34,7 +35,9 @@ commandList.forEach((command) => commands.set(command.name, command));
 
 client.once("ready", () => {
     client.user?.setUsername(`Battiebot`);
-    client.user?.setActivity("revi dc", {type: "WATCHING"})
+    client.user?.setActivity(currentActivity.activity, currentActivity.options)
+    startSchedulingNewActivites(client);
+    
     console.log("Battiebot is aanwezig");
 });
 
