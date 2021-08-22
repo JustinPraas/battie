@@ -3,6 +3,8 @@ import { Command } from "./models/Command";
 import { helpCommand } from "./modules/help";
 import { rolesCommands } from "./modules/roles/roles-module";
 import { currentActivity, startSchedulingNewActivites } from "./modules/scheduling/activity_changer";
+import { startSchedulingHydrationReminders } from "./modules/scheduling/hydration";
+import { schedulingCommands } from "./modules/scheduling/scheduling-module";
 import { soundsCommands } from "./modules/sounds/sounds-module";
 import { utilityCommands } from "./modules/utilities/utilities-module";
 
@@ -24,7 +26,8 @@ export const commandList: Command[] = [
     helpCommand,
     ...rolesCommands,
     ...soundsCommands,
-    ...utilityCommands
+    ...utilityCommands,
+    ...schedulingCommands
 ];
 
 // Make a collection of all the commands the server should handle
@@ -37,7 +40,8 @@ client.once("ready", () => {
     client.user?.setUsername(`Battiebot`);
     client.user?.setActivity(currentActivity.activity, currentActivity.options)
     startSchedulingNewActivites(client);
-    
+    startSchedulingHydrationReminders(client);
+
     console.log("Battiebot is aanwezig");
 });
 
