@@ -7,6 +7,10 @@ import { startSchedulingHydrationReminders } from "./modules/scheduling/hydratio
 import { schedulingCommands } from "./modules/scheduling/scheduling-module";
 import { soundsCommands } from "./modules/sounds/sounds-module";
 import { utilityCommands } from "./modules/utilities/utilities-module";
+import { Logger } from "tslog";
+import { musicCommands } from "./modules/music/music-module";
+
+export const log: Logger = new Logger();
 
 require('dotenv').config({path:__dirname + '../../environment.env'})
 
@@ -27,7 +31,8 @@ export const commandList: Command[] = [
     ...rolesCommands,
     ...soundsCommands,
     ...utilityCommands,
-    ...schedulingCommands
+    ...schedulingCommands,
+    ...musicCommands
 ];
 
 // Make a collection of all the commands the server should handle
@@ -42,7 +47,7 @@ client.once("ready", () => {
     startSchedulingNewActivites(client);
     startSchedulingHydrationReminders(client);
 
-    console.log("Battiebot is aanwezig");
+    log.info("Battiebot is aanwezig");
 });
 
 client.on("message", (message) => {

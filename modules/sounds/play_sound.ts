@@ -3,7 +3,7 @@ import * as path from "path";
 import * as fs from "fs";
 import { SOUND_FILES_DIR_REL_PATH } from "./sounds-module";
 
-const COMMAND = "play"
+const COMMAND = "sound"
 const SUPPORTED_FILETYPES = ["mp3", "mp4", "wav"]
 
 export const playSound: Command = {

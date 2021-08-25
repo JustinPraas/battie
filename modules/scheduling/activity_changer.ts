@@ -1,6 +1,6 @@
 import { ActivityOptions, Client } from "discord.js";
 import { RecurrenceRule, scheduleJob } from "node-schedule"
-
+import { log } from "../../main";
 
 interface Activity {
     activity: string;
@@ -9,7 +9,7 @@ interface Activity {
 
 const activities: Activity[] = [
     {
-        activity: "Typ $help om alle commands te zien",
+        activity: "$help voor commands",
     },
     {
         activity: "Revi dc",
@@ -39,6 +39,34 @@ const activities: Activity[] = [
         activity: "Ramon loop killers",
         options: { type: "WATCHING" },
     },
+    {
+        activity: "Joost \"working\"",
+        options: { type: "WATCHING" },
+    },
+    {
+        activity: "Ruurd's jams",
+        options: { type: "LISTENING" },
+    },
+    {
+        activity: "Dennus' latest video",
+        options: { type: "WATCHING" },
+    },
+    {
+        activity: "Joost spoon pets",
+        options: { type: "WATCHING" },
+    },
+    {
+        activity: "Mert bike",
+        options: { type: "WATCHING" },
+    },
+    {
+        activity: "Daniel not play RS",
+        options: { type: "WATCHING" },
+    },
+    {
+        activity: "Bennie roll a cig",
+        options: { type: "WATCHING" },
+    },
 ]
 
 export let currentActivity: Activity = activities[0];
@@ -62,6 +90,6 @@ export function startSchedulingNewActivites(client: Client) {
     scheduleJob(rule, function () {
         const newRandomActivity = randomActivity();
         client.user?.setActivity(newRandomActivity.activity, newRandomActivity?.options);
-        console.log("Setting new activity", newRandomActivity);
+        log.info("Setting new activity:", newRandomActivity.activity)
     });
 }
