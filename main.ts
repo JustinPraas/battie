@@ -13,6 +13,7 @@ import { utilityCommands } from "./modules/utilities/utilities-module";
 import { Logger } from "tslog";
 import { musicCommands } from "./modules/music/music-module";
 import { Db, MongoClient } from "mongodb";
+import { instantiateSchedulesFromDatabase } from "./modules/scheduling/remind_me";
 
 export const log: Logger = new Logger();
 
@@ -23,7 +24,7 @@ const ACCESS_TOKEN = process.env.DISCORD_KEY;
 // const isProductionEnv = process.env.NODE_ENV === "production";
 
 // Setup discord client
-const client = new Discord.Client();
+export const client = new Discord.Client();
 client.login(ACCESS_TOKEN);
 
 // Setup mongo client
@@ -65,8 +66,10 @@ commandList.forEach((command) => commands.set(command.name, command));
 client.once("ready", () => {
     client.user?.setUsername(`Battiebot`);
     client.user?.setActivity(currentActivity.activity, currentActivity.options);
+
     startSchedulingNewActivites(client);
     startSchedulingHydrationReminders(client);
+    instantiateSchedulesFromDatabase();
 
     log.info("Battiebot is aanwezig");
 });
