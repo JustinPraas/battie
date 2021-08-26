@@ -1,5 +1,6 @@
 import { StreamDispatcher, TextChannel, VoiceChannel, VoiceConnection } from "discord.js";
 import { disconnect } from "./disconnect";
+import { nowPlaying } from "./now-playing";
 import { pause } from "./pause";
 import { play } from "./play";
 import { resume } from "./resume";
@@ -23,7 +24,7 @@ export interface Song {
     startTimeSeconds: number;
 }
 
-export const musicCommands = [play, disconnect, skip, pause, resume];
+export const musicCommands = [play, disconnect, skip, pause, resume, nowPlaying];
 
 export const guildMusicQueueMap = new Map<string, QueueContruct>();
 

@@ -12,7 +12,7 @@ import { soundsCommands } from "./modules/sounds/sounds-module";
 import { utilityCommands } from "./modules/utilities/utilities-module";
 import { Logger } from "tslog";
 import { musicCommands } from "./modules/music/music-module";
-import { Db, MongoClient, MongoClientOptions } from "mongodb";
+import { Db, MongoClient } from "mongodb";
 
 export const log: Logger = new Logger();
 
@@ -101,14 +101,3 @@ function handleCommand(message: Discord.Message) {
     // Otherwise return
     else return;
 }
-
-// if (isProductionEnv && process.env.ACCESS_TOKEN) {
-//     client.login(process.env.ACCESS_TOKEN);
-// } else {
-//     try {
-//         const { ACCESS_TOKEN } = require("./djs-key");
-//         client.login(ACCESS_TOKEN);
-//     } catch (error) {
-//         console.error("No access token found");
-//     }
-// }
