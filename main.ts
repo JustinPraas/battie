@@ -2,17 +2,21 @@ import Discord from "discord.js";
 import { Command } from "./models/Command";
 import { helpCommand } from "./modules/help";
 import { rolesCommands } from "./modules/roles/roles-module";
-import { currentActivity, startSchedulingNewActivites } from "./modules/scheduling/activity_changer";
+import {
+    currentActivity,
+    startSchedulingNewActivites,
+} from "./modules/scheduling/activity_changer";
 import { startSchedulingHydrationReminders } from "./modules/scheduling/hydration";
 import { schedulingCommands } from "./modules/scheduling/scheduling-module";
 import { soundsCommands } from "./modules/sounds/sounds-module";
 import { utilityCommands } from "./modules/utilities/utilities-module";
 import { Logger } from "tslog";
 import { musicCommands } from "./modules/music/music-module";
+import { Db, MongoClient, MongoClientOptions } from "mongodb";
 
 export const log: Logger = new Logger();
 
-require('dotenv').config({path:__dirname + '../../environment.env'})
+require("dotenv").config({ path: __dirname + "../../environment.env" });
 
 const ACCESS_TOKEN = process.env.DISCORD_KEY;
 
@@ -22,8 +26,25 @@ const ACCESS_TOKEN = process.env.DISCORD_KEY;
 const client = new Discord.Client();
 client.login(ACCESS_TOKEN);
 
+// Setup mongo client
+const user = process.env.MONGODB_USER;
+const password = process.env.MONGODB_PASSWORD;
+const clusterUrl = process.env.MONGODB_CLUSTER_URL;
+const uri = `mongodb+srv://${user}:${password}@${clusterUrl}?retryWrites=true&writeConcern=majority`;
+const mongoClient = new MongoClient(uri);
+export let battieDb: Db | null = null;
+
+mongoClient.connect().then(() => {
+    battieDb = mongoClient.db("battiebot");
+    log.info("Connected to MongoDB database");
+})
+.catch(err => {
+    log.error(err);
+    mongoClient.close();
+})
+
 // Set command prefix based on environment
-export const COMMAND_PREFIX = "$"
+export const COMMAND_PREFIX = "$";
 
 // Get all desired commands that the server should handle
 export const commandList: Command[] = [
@@ -32,7 +53,7 @@ export const commandList: Command[] = [
     ...soundsCommands,
     ...utilityCommands,
     ...schedulingCommands,
-    ...musicCommands
+    ...musicCommands,
 ];
 
 // Make a collection of all the commands the server should handle
@@ -43,7 +64,7 @@ commandList.forEach((command) => commands.set(command.name, command));
 
 client.once("ready", () => {
     client.user?.setUsername(`Battiebot`);
-    client.user?.setActivity(currentActivity.activity, currentActivity.options)
+    client.user?.setActivity(currentActivity.activity, currentActivity.options);
     startSchedulingNewActivites(client);
     startSchedulingHydrationReminders(client);
 
@@ -55,6 +76,13 @@ client.on("message", (message) => {
         handleCommand(message);
         return;
     }
+});
+
+client.on("disconnect", () => {
+    log.info("Battiebot disconnecting...")
+
+    log.info("Disconnceting connection to MongoDb...")
+    mongoClient.close();
 });
 
 function handleCommand(message: Discord.Message) {
