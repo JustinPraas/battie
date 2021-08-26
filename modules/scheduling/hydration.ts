@@ -116,7 +116,7 @@ export function startSchedulingHydrationReminders(client: Client) {
 function remindHydrationSubscribers(client: Client) {
     if (battieDb) {
         const subs: FindCursor<Document> = battieDb.collection("hydration").find();
-        log.info(`Reminding ${subs.count} subscribers to hydrate`);
+        log.info(`Reminding all subscribers to hydrate`);
         subs.forEach((sub: Document) => {
             const discordId = sub.discordId;
             client.users.cache.get(discordId)?.send("Hydration Reminder: drink ongeveer 200-300ml water!")
