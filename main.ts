@@ -59,8 +59,6 @@ export const commandList: Command[] = [
     ...reminderCommands
 ];
 
-log.debug(commandList)
-
 // Make a collection of all the commands the server should handle
 const commands = new Discord.Collection<string, Command>();
 
