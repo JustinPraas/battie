@@ -1,4 +1,3 @@
-import { log } from "../../main";
 import { Command } from "../../models/Command";
 import { guildMusicQueueMap, QueueContruct } from "./music-module";
 

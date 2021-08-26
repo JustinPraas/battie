@@ -62,3 +62,15 @@ export function getFriendlyDate(d: Date) {
         ampm
     );
 }
+
+export function getHoursFromSeconds(seconds: number) {
+    return Math.floor(seconds / 3600);
+}
+
+export function getMinutesFromSeconds(seconds: number) {
+    return Math.floor((seconds % 3600) / 60);
+}
+
+export function getSecondsFromSeconds(seconds: number) {
+    return Math.floor(seconds % 60);
+}

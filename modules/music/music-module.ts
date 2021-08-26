@@ -3,6 +3,7 @@ import { disconnect } from "./disconnect";
 import { nowPlaying } from "./now-playing";
 import { pause } from "./pause";
 import { play } from "./play";
+import { queue } from "./queue";
 import { resume } from "./resume";
 import { skip } from "./skip";
 
@@ -24,7 +25,7 @@ export interface Song {
     startTimeSeconds: number;
 }
 
-export const musicCommands = [play, disconnect, skip, pause, resume, nowPlaying];
+export const musicCommands = [play, disconnect, skip, pause, resume, nowPlaying, queue];
 
 export const guildMusicQueueMap = new Map<string, QueueContruct>();
 
