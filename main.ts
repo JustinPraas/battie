@@ -5,15 +5,16 @@ import { rolesCommands } from "./modules/roles/roles-module";
 import {
     currentActivity,
     startSchedulingNewActivites,
-} from "./modules/scheduling/activity_changer";
-import { startSchedulingHydrationReminders } from "./modules/scheduling/hydration";
-import { schedulingCommands } from "./modules/scheduling/scheduling-module";
+} from "./modules/misc/activity_changer";
+import { startSchedulingHydrationReminders } from "./modules/misc/hydration";
+import { miscCommands } from "./modules/misc/scheduling-module";
 import { soundsCommands } from "./modules/sounds/sounds-module";
 import { utilityCommands } from "./modules/utilities/utilities-module";
 import { Logger } from "tslog";
 import { musicCommands } from "./modules/music/music-module";
 import { Db, MongoClient } from "mongodb";
-import { instantiateSchedulesFromDatabase } from "./modules/scheduling/remind_me";
+import { instantiateSchedulesFromDatabase } from "./modules/reminders/remind_me";
+import { reminderCommands } from "./modules/reminders/reminders-module";
 
 export const log: Logger = new Logger();
 
@@ -53,9 +54,12 @@ export const commandList: Command[] = [
     ...rolesCommands,
     ...soundsCommands,
     ...utilityCommands,
-    ...schedulingCommands,
+    ...miscCommands,
     ...musicCommands,
+    ...reminderCommands
 ];
+
+log.debug(commandList)
 
 // Make a collection of all the commands the server should handle
 const commands = new Discord.Collection<string, Command>();

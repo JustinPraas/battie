@@ -1,20 +1,15 @@
 import { DMChannel, Message, NewsChannel, TextChannel, User } from "discord.js";
-import { Document } from "mongodb";
-import { RecurrenceRule, scheduleJob } from "node-schedule";
+import { Job, RecurrenceRule, scheduleJob } from "node-schedule";
 import { battieDb, client, log } from "../../main";
 import { Command } from "../../models/Command";
 import { getFriendlyDate, sleep } from "../../utils";
-
-interface RemindMeDocument extends Document {
-    discordId: string;
-    channelId: string;
-    content: string;
-    timestamp: number;
-}
+import { RemindMeDocument } from "./reminders-module";
 
 const COMMAND = "remindme";
 
-export const remindMeOn: Command = {
+export const activeRemindersMap = new Map<string, Job>();
+
+export const remindMe: Command = {
     name: COMMAND,
     format: `${COMMAND} <in | on> <x days/minutes/hours/seconds | date and time>; <content>`,
     description:
@@ -46,6 +41,10 @@ export const remindMeOn: Command = {
     },
 };
 
+const ACCEPTED_DAYS_STRINGS = ["days", "dagen", "d", "day", "dag"];
+const ACCEPTED_HOURS_STRINGS = ["hours", "uren", "h", "u", "uur", "hour"];
+const ACCEPTED_MINUTES_STRINGS = ["minutes", "minuten", "mins", "min", "m", "minuut", "minute"];
+const ACCEPTED_SECONDS_STRINGS = ["seconds", "seconden", "s", "secondes", "seconde", "second", "sec"];
 function scheduleIn(
     message: Message,
     user: User,
@@ -53,29 +52,31 @@ function scheduleIn(
     content: string
 ) {
     const scheduleTimeBuilder = new Date(Date.now());
-    const regex =/(\d*\s[a-z]+)+/gm
+    const regex = /(\d*\s[a-z]+)+/gm;
     let match = dateAndTimePart.match(regex);
 
     if (match) {
         match = match.filter((value) => value != "");
         for (let i = 0; i < match.length; i++) {
-            const m = match[i]
+            const m = match[i];
             const number = parseInt(m.split(" ")[0]);
             const quantifier = m.split(" ")[1];
 
-            if (["days", "dagen", "d"].includes(quantifier)) {
+            if (ACCEPTED_DAYS_STRINGS.includes(quantifier)) {
                 scheduleTimeBuilder.setDate(
                     scheduleTimeBuilder.getDate() + number
                 );
-            } else if (["hours", "uren", "h", "u"].includes(quantifier)) {
+            } else if (ACCEPTED_HOURS_STRINGS.includes(quantifier)) {
                 scheduleTimeBuilder.setTime(
                     scheduleTimeBuilder.getTime() + number * 60 * 60 * 1000
                 );
-            } else if (["minutes", "minuten", "mins", "min", "m"].includes(quantifier)) {
+            } else if (
+                ACCEPTED_MINUTES_STRINGS.includes(quantifier)
+            ) {
                 scheduleTimeBuilder.setTime(
                     scheduleTimeBuilder.getTime() + number * 60 * 1000
                 );
-            } else if (["seconds", "seconden", "s"].includes(quantifier)) {
+            } else if (ACCEPTED_SECONDS_STRINGS.includes(quantifier)) {
                 scheduleTimeBuilder.setTime(
                     scheduleTimeBuilder.getTime() + number * 1000
                 );
@@ -115,10 +116,15 @@ function scheduleRemindMe(
     user: User,
     channel: TextChannel | DMChannel | NewsChannel
 ) {
+    const randomString = (
+        Math.random().toString(36).substring(5, 15) +
+        Math.random().toString(36).substring(10, 15)
+    ).substring(0, 5);
     const remindMeDocument: RemindMeDocument = {
+        id: randomString,
         discordId: user.id,
         channelId: channel.id,
-        content: content,
+        content: content.trim(),
         timestamp: date.getTime(),
     };
 
@@ -126,7 +132,14 @@ function scheduleRemindMe(
         const collection = battieDb.collection("reminders");
         collection.insertOne(remindMeDocument).then((response) => {
             if (response.acknowledged) {
-                scheduleJobForRemindMe(date, channel, user, content, true);
+                scheduleJobForRemindMe(
+                    randomString,
+                    date,
+                    channel,
+                    user,
+                    content,
+                    true
+                );
             } else {
                 channel.send(
                     "Er is wat mis gegaan bij het opslaan van de remindme..."
@@ -137,21 +150,26 @@ function scheduleRemindMe(
 }
 
 function scheduleJobForRemindMe(
+    id: string,
     date: Date,
     channel: TextChannel | DMChannel | NewsChannel,
     user: User,
     content: string,
     sendMessage: boolean
 ) {
-    scheduleJob(date, () =>
+    const job = scheduleJob(date, () =>
         channel.send(
             `<@${user}>, ik heb een herinnering voor je: **${content}**`
         )
     );
 
+    activeRemindersMap.set(id, job);
+
     if (sendMessage) {
         channel.send(
-            `Komt voor de bakker. Reminder staat gescheduled op **${getFriendlyDate(date)}**`
+            `Komt voor de bakker. Reminder staat gescheduled op **${getFriendlyDate(
+                date
+            )}**`
         );
     }
 
@@ -193,6 +211,7 @@ export async function instantiateSchedulesFromDatabase() {
                         const channel: TextChannel | DMChannel | NewsChannel =
                             results[1];
                         scheduleJobForRemindMe(
+                            reminder.id,
                             date,
                             channel,
                             user,
