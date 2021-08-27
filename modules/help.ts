@@ -37,7 +37,7 @@ export const helpCommand: Command = {
 
             commandList.forEach((c) => {
                 const paddedCommandName = c.name.padEnd(15)
-                printString += `${paddedCommandName}${c.description}\n`;
+                printString += `${paddedCommandName}\n`;
             });
 
             printString += "```";
