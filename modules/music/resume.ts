@@ -1,4 +1,5 @@
 import { Command } from "../../models/Command";
+import { reactWithDefaultEmoji } from "../../utils";
 import { guildMusicQueueMap } from "./music-module";
 
 const COMMAND = "resume";
@@ -25,6 +26,6 @@ export const resume: Command = {
         }
 
         dispatcher.resume();
-        message.channel.send("Ik speel het nummer verder...")     
+        reactWithDefaultEmoji(message, "👍🏼");  
     },
 };

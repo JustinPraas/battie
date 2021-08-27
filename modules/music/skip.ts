@@ -1,5 +1,6 @@
 import { Message } from "discord.js";
 import { Command } from "../../models/Command";
+import { reactWithDefaultEmoji } from "../../utils";
 import { guildMusicQueueMap, QueueConstruct } from "./music-module";
 
 const COMMAND = "skip";
@@ -40,7 +41,7 @@ function skipSong(message: Message, serverQueue: QueueConstruct) {
 
     if (serverQueue.connection && serverQueue.playing) {
         serverQueue.connection.dispatcher.end();
-        return message.channel.send("Ik vond dit ook al geen leuk liedje... ;)")
+        return reactWithDefaultEmoji(message, "👍🏼");
     } else {
         return message.channel.send("Ik ben geen liedje aan het afspelen...")
     }

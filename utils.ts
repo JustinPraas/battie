@@ -1,3 +1,6 @@
+import { Message } from "discord.js";
+import { client } from "./main";
+
 export function shuffle(array: any[]) {
     var currentIndex = array.length,
         randomIndex;
@@ -16,6 +19,10 @@ export function shuffle(array: any[]) {
     }
 
     return array;
+}
+
+export function reactWithDefaultEmoji(message: Message, emoji: string) {
+    message.react(emoji)
 }
 
 export function sleep(ms: number) {

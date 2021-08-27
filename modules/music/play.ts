@@ -112,9 +112,6 @@ function playYoutubeLink(url: string, args: string[], message: Message, guild: G
             guildMusicQueueMap.set(guild.id, queueConstruct)
         }
 
-        // Setting the queue using our contract
-        guildMusicQueueMap.set(guild.id, queueConstruct);
-
         // Pushing the song to our songs array
         queueConstruct.songs.push(song);
 
@@ -130,7 +127,8 @@ function playYoutubeLink(url: string, args: string[], message: Message, guild: G
                 queueConstruct!.connection = connection;
                 queueConstruct!.voiceChannel = voiceChannel;
                 // Calling the play function to start a song
-                playSong(guild, queueConstruct!.songs[0]);
+                
+                if (!queueConstruct!.playing) playSong(guild, queueConstruct!.songs[0]);
             });                    
         } catch (err) {
             // Printing the error message if the bot fails to join the voicechat

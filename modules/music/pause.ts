@@ -1,4 +1,5 @@
 import { Command } from "../../models/Command";
+import { reactWithDefaultEmoji } from "../../utils";
 import { guildMusicQueueMap, QueueConstruct } from "./music-module";
 
 const COMMAND = "pause";
@@ -25,6 +26,6 @@ export const pause: Command = {
         }
 
         dispatcher.pause();
-        message.channel.send("Ik heb het nummer gepauzeerd")     
+        reactWithDefaultEmoji(message, "👍🏼");
     },
 };

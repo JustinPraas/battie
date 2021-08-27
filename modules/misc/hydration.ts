@@ -3,6 +3,7 @@ import { Db, Document, FindCursor } from "mongodb";
 import { RecurrenceRule, scheduleJob } from "node-schedule";
 import { battieDb, log } from "../../main";
 import { Command } from "../../models/Command";
+import { reactWithDefaultEmoji } from "../../utils";
 
 interface HydrationSubscriberDocument {
     discordId: string;
@@ -44,9 +45,7 @@ function removeSubscriber(user: User, message: Message) {
                 collection
                     .deleteOne(newSub)
                     .then(() => {
-                        message.channel.send(
-                            "Je bent niet meer gesubscribed op de hydration reminder. Droog niet uit!"
-                        );
+                        reactWithDefaultEmoji(message, "👍🏼");
                     })
                     .catch((err) => {
                         message.channel.send(
@@ -78,9 +77,7 @@ function addSubscriber(user: User, message: Message) {
                 collection
                     .insertOne(newSub)
                     .then(() => {
-                        message.channel.send(
-                            "Je hebt gesubscribed op de hydration reminder. Stay hydrated :)"
-                        );
+                        reactWithDefaultEmoji(message, "👍🏼");
                     })
                     .catch((err) => {
                         message.channel.send(

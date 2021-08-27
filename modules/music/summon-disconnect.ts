@@ -1,6 +1,7 @@
 import { TextChannel, User } from "discord.js";
 import { log } from "../../main";
 import { Command } from "../../models/Command";
+import { reactWithDefaultEmoji } from "../../utils";
 import { getEmptyQueueConstruct, guildMusicQueueMap, QueueConstruct } from "./music-module";
 
 const DC_COMMAND = "dc";
@@ -29,7 +30,7 @@ export const disconnect: Command = {
         guildMusicQueue.voiceChannel.leave();
         guildMusicQueueMap.delete(guild.id);
 
-        message.channel.send("OK doei.");
+        reactWithDefaultEmoji(message, "👍🏼");
     },
 };
 
@@ -70,7 +71,7 @@ export const summon: Command = {
                 .join()
                 .then(
                     (voiceConnection) => {
-                        message.channel.send("Ik kom al!")
+                        reactWithDefaultEmoji(message, "👍🏼");
                         guildMusicQueue.connection = voiceConnection
                         guildMusicQueue.voiceChannel = voiceConnection.channel
                     }
@@ -83,7 +84,7 @@ export const summon: Command = {
                 .join()
                 .then(
                     (voiceConnection) => {
-                        message.channel.send("Ik kom al!")
+                        reactWithDefaultEmoji(message, "👍🏼");
                         newQueueConstruct.connection = voiceConnection
                         newQueueConstruct.voiceChannel = voiceConnection.channel
                     }
