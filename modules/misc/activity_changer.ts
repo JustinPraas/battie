@@ -110,6 +110,8 @@ export const setActivity: Command = {
                     reactWithDefaultEmoji(message, "👍🏼");
                     break;
             }
+
+            activityChangerJob?.cancelNext()
         }
     },
 };
