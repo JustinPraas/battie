@@ -7,6 +7,7 @@ import {
     guildMusicQueueMap,
 } from "../music/music-module";
 import { TextChannel } from "discord.js";
+import { reactWithDefaultEmoji } from "../../utils";
 
 const COMMAND = "sound";
 const SUPPORTED_FILETYPES = ["mp3", "mp4", "wav"];
@@ -75,7 +76,7 @@ export const playSound: Command = {
                                     guildMusicQueue.playing = false
                                 }
                             })
-                        message.reply(`${args} aan het afspelen.`);
+                            reactWithDefaultEmoji(message, "👍🏼");
                     })
                     .catch((e) => console.log(e));
             } else {
