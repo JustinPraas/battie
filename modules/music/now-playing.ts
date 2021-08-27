@@ -1,5 +1,5 @@
 import { Command } from "../../models/Command";
-import { guildMusicQueueMap, QueueContruct } from "./music-module";
+import { guildMusicQueueMap, QueueConstruct } from "./music-module";
 
 const COMMAND = "np";
 
@@ -16,10 +16,11 @@ export const nowPlaying: Command = {
             );
         }
 
-        const guildMusicQueue: QueueContruct = guildMusicQueueMap.get(
+        const guildMusicQueue: QueueConstruct = guildMusicQueueMap.get(
             guild.id
         )!;
-        if (!guildMusicQueue) {
+
+        if (!guildMusicQueue || !guildMusicQueue.songs[0]) {
             return message.channel.send("Er wordt momenteel niets afgespeeld");
         }
 

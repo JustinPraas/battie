@@ -2,7 +2,7 @@ import { Guild, TextChannel } from "discord.js";
 import ytdl, { MoreVideoDetails } from "ytdl-core";
 import { log } from "../../main";
 import { Command } from "../../models/Command";
-import { guildMusicQueueMap, QueueContruct, Song } from "./music-module";
+import { getEmptyQueueConstruct, guildMusicQueueMap, Song } from "./music-module";
 
 const COMMAND = "play";
 
@@ -21,7 +21,6 @@ export const play: Command = {
             return message.channel.send("Je moet dit in een tekst kanaal in een discord server gebruiken")
         }
 
-        const serverQueue = guildMusicQueueMap.get(guild.id);
         const url = args.shift();
         if (!url) {
             return message.channel.send("Je hebt geen URL meegegeven???");
@@ -80,42 +79,37 @@ export const play: Command = {
                 startTimeSeconds: startSeconds
             };
 
-            if (!serverQueue) {
+            let queueConstruct = guildMusicQueueMap.get(guild.id);
+            if (!queueConstruct) {
                 // Creating the contract for our queue
-                const queueContruct: QueueContruct = {
-                    textChannel: message.channel as TextChannel,
-                    voiceChannel: voiceChannel,
-                    connection: null,
-                    dispatcher: null,
-                    songs: [],
-                    volume: 5,
-                    playing: true,
-                };
+                queueConstruct = getEmptyQueueConstruct()
+                queueConstruct.textChannel = message.channel as TextChannel
+                guildMusicQueueMap.set(guild.id, queueConstruct)
+            }
 
-                // Setting the queue using our contract
-                guildMusicQueueMap.set(guild.id, queueContruct);
+            // Setting the queue using our contract
+            guildMusicQueueMap.set(guild.id, queueConstruct);
 
-                // Pushing the song to our songs array
-                queueContruct.songs.push(song);
+            // Pushing the song to our songs array
+            queueConstruct.songs.push(song);
 
-                try {
-                    // Attempt to join voice channel and set the connection in the queue construct
-                    voiceChannel.join().then(connection => {
-                        queueContruct.connection = connection;
-                        // Calling the play function to start a song
-                        playSong(guild, queueContruct.songs[0]);
-                    });                    
-                } catch (err) {
-                    // Printing the error message if the bot fails to join the voicechat
-                    console.log(err);
-                    guildMusicQueueMap.delete(guild.id);
-                    return message.channel.send(err);
-                }
-            } else {
-                serverQueue.songs.push(song);
-                return message.channel.send(
-                    `**${song.title}** is aan de queue toegevoegd!`
-                );
+            message.channel.send(
+                `**${song.title}** is aan de queue toegevoegd!`
+            );
+
+            try {
+                // Attempt to join voice channel and set the connection in the queue construct
+                voiceChannel.join().then(connection => {
+                    queueConstruct!.connection = connection;
+                    queueConstruct!.voiceChannel = voiceChannel;
+                    // Calling the play function to start a song
+                    playSong(guild, queueConstruct!.songs[0]);
+                });                    
+            } catch (err) {
+                // Printing the error message if the bot fails to join the voicechat
+                log.error(err);
+                guildMusicQueueMap.delete(guild.id);
+                return message.channel.send("Er ging iets fout bij het joinen van de voicechat...");
             }
         })
         .catch(error => {
@@ -127,33 +121,31 @@ export const play: Command = {
 
 function playSong(guild: Guild, song: Song) {
     const guildMusicQueue = guildMusicQueueMap.get(guild.id)!;
-    
-    if (!song) {
-        guildMusicQueue.voiceChannel.leave();
-        guildMusicQueueMap.delete(guild.id);
-        return;
-    }
 
     const voiceConnection = guildMusicQueue.connection;
 
-    if (!voiceConnection) {
-        return log.error("Could not find a voice connection for guild: ", guild)
+    if (song) {
+        if (!voiceConnection) {
+            return log.error("Could not find a voice connection for guild: ", guild)
+        }
+    
+        const audioStream = ytdl(song.url, {quality: "highestaudio"});
+    
+        const dispatcher = voiceConnection
+            .play(audioStream, {seek: song.startTimeSeconds})
+            .on("start", () => {
+                guildMusicQueue.playing = true;
+                dispatcher.setVolumeLogarithmic(guildMusicQueue.volume / 5);
+                guildMusicQueue.textChannel?.send(`Ik speel nu: **${song.title}**`);
+                log.info(`Battiebot is playing a song in ${guild.name}: ${song.title}`);
+            })
+            .on("finish", () => {
+                guildMusicQueue.songs.shift();
+                guildMusicQueue.playing = false;
+                playSong(guild, guildMusicQueue.songs[0]);
+            })
+            .on("error", (error: any) => console.error(error));   
+            
+        guildMusicQueue.dispatcher = dispatcher;
     }
-
-    const audioStream = ytdl(song.url, {quality: "highestaudio"});
-
-    const dispatcher = voiceConnection
-        .play(audioStream, {seek: song.startTimeSeconds})
-        .on("start", () => {
-            dispatcher.setVolumeLogarithmic(guildMusicQueue.volume / 5);
-            guildMusicQueue.textChannel.send(`Ik speel nu: **${song.title}**`);
-            log.info(`Battiebot is playing a song in **${guild.name}**: **${song.title}`);
-        })
-        .on("finish", () => {
-            guildMusicQueue.songs.shift();
-            playSong(guild, guildMusicQueue.songs[0]);
-        })
-        .on("error", (error: any) => console.error(error));   
-        
-    guildMusicQueue.dispatcher = dispatcher;
 }

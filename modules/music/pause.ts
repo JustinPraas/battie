@@ -1,5 +1,5 @@
 import { Command } from "../../models/Command";
-import { guildMusicQueueMap, QueueContruct } from "./music-module";
+import { guildMusicQueueMap, QueueConstruct } from "./music-module";
 
 const COMMAND = "pause";
 

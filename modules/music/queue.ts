@@ -1,6 +1,6 @@
 import { Command } from "../../models/Command";
 import { getHoursFromSeconds, getMinutesFromSeconds, getSecondsFromSeconds } from "../../utils";
-import { guildMusicQueueMap, QueueContruct } from "./music-module";
+import { guildMusicQueueMap, QueueConstruct } from "./music-module";
 
 const COMMAND = "queue";
 
@@ -17,7 +17,7 @@ export const queue: Command = {
             );
         }
 
-        const guildMusicQueue: QueueContruct = guildMusicQueueMap.get(
+        const guildMusicQueue: QueueConstruct = guildMusicQueueMap.get(
             guild.id
         )!;
         if (!guildMusicQueue) {

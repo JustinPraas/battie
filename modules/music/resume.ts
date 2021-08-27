@@ -16,12 +16,12 @@ export const resume: Command = {
 
         const guildMusicQueue = guildMusicQueueMap.get(guild.id);
         if (!guildMusicQueue) {
-            return message.channel.send("Ik kan geen liedjes pauzeren ALS ER GEEN LIEDJES IN DE QUEUE STAAN :@")
+            return message.channel.send("Ik kan geen liedjes resumen ALS ER GEEN LIEDJES IN DE QUEUE STAAN :@")
         }
 
         const dispatcher = guildMusicQueue.dispatcher;
         if (!dispatcher) {
-            return message.channel.send("Ik kan geen dispatcher vinden om te pauzeren");
+            return message.channel.send("Ik kan geen dispatcher vinden om te resumen");
         }
 
         dispatcher.resume();

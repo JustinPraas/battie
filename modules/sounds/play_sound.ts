@@ -2,9 +2,14 @@ import { Command } from "../../models/Command";
 import * as path from "path";
 import * as fs from "fs";
 import { SOUND_FILES_DIR_REL_PATH } from "./sounds-module";
+import {
+    getEmptyQueueConstruct,
+    guildMusicQueueMap,
+} from "../music/music-module";
+import { TextChannel } from "discord.js";
 
-const COMMAND = "sound"
-const SUPPORTED_FILETYPES = ["mp3", "mp4", "wav"]
+const COMMAND = "sound";
+const SUPPORTED_FILETYPES = ["mp3", "mp4", "wav"];
 
 export const playSound: Command = {
     name: `${COMMAND}`,
@@ -15,16 +20,30 @@ export const playSound: Command = {
             return message.reply("Je moet in een spraak-kanaal zitten");
 
         // Checking if the bot is in a voice channel.
-        if (message.guild?.me?.voice.channel)
-            return message.reply("Ik ben al aan het afspelen");
+        const guild = message.guild;
+        if (!guild) {
+            return message.channel.send(
+                "Zorg ervoor dat je altijd in een server dit bericht stuurt..."
+            );
+        }
+
+        let guildMusicQueue = guildMusicQueueMap.get(guild.id);
+        if (guildMusicQueue) {
+            if (guildMusicQueue.playing) {
+                return message.reply("Ik ben al een liedje aan het afspelen!");
+            }
+        } else {
+            guildMusicQueue = getEmptyQueueConstruct();
+            guildMusicQueue.textChannel = message.channel as TextChannel;
+            guildMusicQueueMap.set(guild.id, guildMusicQueue);
+        }
 
         try {
-            const specifiedSound = args.shift()!
+            const specifiedSound = args.shift()!;
 
             let filePath: string = "";
             let fileExists: boolean = false;
             for (let i = 0; i < SUPPORTED_FILETYPES.length; i++) {
-
                 // Construct potential filepath
                 filePath = path.join(
                     __dirname,
@@ -38,22 +57,31 @@ export const playSound: Command = {
                     break;
                 }
             }
-            
 
             if (fileExists) {
                 // Joining the channel and creating a VoiceConnection.
-                message.member.voice.channel
+                const channel = guildMusicQueue.voiceChannel ? guildMusicQueue.voiceChannel : message.member.voice.channel
+                channel
                     .join()
                     .then((voiceConnection) => {
                         // Playing the music, and, on finish, disconnecting the bot.
+                        guildMusicQueue!.connection = voiceConnection;
+                        guildMusicQueue!.voiceChannel = channel;
+                        guildMusicQueue!.playing = true;
                         voiceConnection
                             .play(filePath)
-                            .on("finish", () => voiceConnection.disconnect());
+                            .on("finish", () => {
+                                if (guildMusicQueue) {
+                                    guildMusicQueue.playing = false
+                                }
+                            })
                         message.reply(`${args} aan het afspelen.`);
                     })
                     .catch((e) => console.log(e));
             } else {
-                message.reply(`Je gevraagde sound '${specifiedSound}' bestaat niet`);
+                message.reply(
+                    `Je gevraagde sound '${specifiedSound}' bestaat niet`
+                );
             }
         } catch (err) {
             console.error(err);
