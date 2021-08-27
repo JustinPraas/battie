@@ -22,7 +22,7 @@ export const disconnect: Command = {
 
         if (!guildMusicQueue || !guildMusicQueue.voiceChannel) {
             return message.channel.send(
-                "Ik blijkt niet eens actief te zijn... waarom wil je me zo graag weg hebben???"
+                "Ik blijk niet eens actief te zijn... waarom wil je me zo graag weg hebben???"
             );
         }
 

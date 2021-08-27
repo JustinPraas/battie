@@ -1,4 +1,5 @@
-import { Guild, TextChannel } from "discord.js";
+import { Guild, Message, TextChannel, VoiceChannel } from "discord.js";
+import yts from "yt-search";
 import ytdl, { MoreVideoDetails } from "ytdl-core";
 import { log } from "../../main";
 import { Command } from "../../models/Command";
@@ -19,11 +20,6 @@ export const play: Command = {
         const isTextChannel = message.channel instanceof TextChannel
         if (!isTextChannel) {
             return message.channel.send("Je moet dit in een tekst kanaal in een discord server gebruiken")
-        }
-
-        const url = args.shift();
-        if (!url) {
-            return message.channel.send("Je hebt geen URL meegegeven???");
         }
 
         const voiceChannel = message.member?.voice.channel;
@@ -48,76 +44,106 @@ export const play: Command = {
             );
         }
 
-        // Validate the start time, if given
-        const startTimestamp = args.shift()
-        if (startTimestamp) {
+        const firstArgument = args.shift();
+        if (!firstArgument) {
+            return message.channel.send("Je hebt geen argument meegegeven???");
+        } else {
+
+            // Check if first argument is a youtube link. If so, play the song from the youtube link
+            const ytRegex = /(.*youtu\.be.*)|(.*youtube\.com.*)/gm
+            const isYtLink = firstArgument.match(ytRegex)
+            if (isYtLink) {
+                playYoutubeLink(firstArgument, args, message, guild, voiceChannel)
+            } else {
+                playSearchTerm(`${firstArgument} ${args.join(" ")}`, message, guild, voiceChannel)
+            }
+        }
+    },
+};
+
+function playSearchTerm(searchTerm: string, message: Message, guild: Guild, voiceChannel: VoiceChannel) {
+    yts(searchTerm).then(result => {
+        const video = result.videos[0]
+        if (video) {
+            playYoutubeLink(video.url, [], message, guild, voiceChannel)
+        } else {
+            return message.channel.send(`Ik kon helaas geen video vinden voor **${searchTerm}**`)
+        }
+    })
+}
+
+function playYoutubeLink(url: string, args: string[], message: Message, guild: Guild, voiceChannel: VoiceChannel) {
+    // Validate the start time, if given
+    const startTimestamp = args.shift()
+    if (startTimestamp) {
+        const minute = startTimestamp.split(":")[0]
+        const second = startTimestamp.split(":")[1]
+
+        if (Number.isNaN(parseInt(minute)) || Number.isNaN(parseInt(second))) {
+            return message.channel.send("Er ging wat mis met het parsen van de starttijd... Weet je wel wat je doet?");
+        }
+    }        
+
+    // Get song info
+    ytdl.getInfo(url).then(response => {
+
+        let startSeconds = 0;
+        if (startTimestamp) {     
             const minute = startTimestamp.split(":")[0]
-            const second = startTimestamp.split(":")[1]
+            const second = startTimestamp.split(":")[1]           
+            startSeconds = parseInt(minute) * 60 + parseInt(second)
+        }
 
-            if (Number.isNaN(parseInt(minute)) || Number.isNaN(parseInt(second))) {
-                return message.channel.send("Er ging wat mis met het parsen van de starttijd... Weet je wel wat je doet?");
-            }
-        }        
+        // Extract video info from response
+        const videoDetails: MoreVideoDetails = response.videoDetails;
+        const song: Song = {
+            title: videoDetails.title,
+            url: videoDetails.video_url,
+            lengthSeconds: videoDetails.lengthSeconds,
+            viewCount: videoDetails.viewCount,
+            startTimeSeconds: startSeconds
+        };
 
-        // Get song info
-        ytdl.getInfo(url).then(response => {
+        let queueConstruct = guildMusicQueueMap.get(guild.id);
+        if (!queueConstruct) {
+            // Creating the contract for our queue
+            queueConstruct = getEmptyQueueConstruct()
+            queueConstruct.textChannel = message.channel as TextChannel
+            guildMusicQueueMap.set(guild.id, queueConstruct)
+        }
 
-            let startSeconds = 0;
-            if (startTimestamp) {     
-                const minute = startTimestamp.split(":")[0]
-                const second = startTimestamp.split(":")[1]           
-                startSeconds = parseInt(minute) * 60 + parseInt(second)
-            }
+        // Setting the queue using our contract
+        guildMusicQueueMap.set(guild.id, queueConstruct);
 
-            // Extract video info from response
-            const videoDetails: MoreVideoDetails = response.videoDetails;
-            const song: Song = {
-                title: videoDetails.title,
-                url: videoDetails.video_url,
-                lengthSeconds: videoDetails.lengthSeconds,
-                viewCount: videoDetails.viewCount,
-                startTimeSeconds: startSeconds
-            };
+        // Pushing the song to our songs array
+        queueConstruct.songs.push(song);
 
-            let queueConstruct = guildMusicQueueMap.get(guild.id);
-            if (!queueConstruct) {
-                // Creating the contract for our queue
-                queueConstruct = getEmptyQueueConstruct()
-                queueConstruct.textChannel = message.channel as TextChannel
-                guildMusicQueueMap.set(guild.id, queueConstruct)
-            }
-
-            // Setting the queue using our contract
-            guildMusicQueueMap.set(guild.id, queueConstruct);
-
-            // Pushing the song to our songs array
-            queueConstruct.songs.push(song);
-
+        if (queueConstruct.songs.length > 1) {
             message.channel.send(
                 `**${song.title}** is aan de queue toegevoegd!`
             );
+        }
 
-            try {
-                // Attempt to join voice channel and set the connection in the queue construct
-                voiceChannel.join().then(connection => {
-                    queueConstruct!.connection = connection;
-                    queueConstruct!.voiceChannel = voiceChannel;
-                    // Calling the play function to start a song
-                    playSong(guild, queueConstruct!.songs[0]);
-                });                    
-            } catch (err) {
-                // Printing the error message if the bot fails to join the voicechat
-                log.error(err);
-                guildMusicQueueMap.delete(guild.id);
-                return message.channel.send("Er ging iets fout bij het joinen van de voicechat...");
-            }
-        })
-        .catch(error => {
-            log.error("Er ging wat fout bij het toevoegen van een liedje aan de queue:", error)
-            message.channel.send("Er ging wat fout bij het toevoegen van het liedje aan de lijst... :(")
-        });
-    },
-};
+        try {
+            // Attempt to join voice channel and set the connection in the queue construct
+            voiceChannel.join().then(connection => {
+                queueConstruct!.connection = connection;
+                queueConstruct!.voiceChannel = voiceChannel;
+                // Calling the play function to start a song
+                playSong(guild, queueConstruct!.songs[0]);
+            });                    
+        } catch (err) {
+            // Printing the error message if the bot fails to join the voicechat
+            log.error(err);
+            guildMusicQueueMap.delete(guild.id);
+            return message.channel.send("Er ging iets fout bij het joinen van de voicechat...");
+        }
+    })
+    .catch(error => {
+        log.error("Er ging wat fout bij het toevoegen van een liedje aan de queue:", error)
+        message.channel.send("Er ging wat fout bij het toevoegen van het liedje aan de lijst... :(")
+    });
+}
 
 function playSong(guild: Guild, song: Song) {
     const guildMusicQueue = guildMusicQueueMap.get(guild.id)!;

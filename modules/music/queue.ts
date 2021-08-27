@@ -35,7 +35,7 @@ export const queue: Command = {
                 const hours = getHoursFromSeconds(songDurationSeconds);
                 const minutes = getMinutesFromSeconds(songDurationSeconds);
                 const seconds = getSecondsFromSeconds(songDurationSeconds);
-                const durationString = `${hours > 0 ? hours + ":" : ""}${minutes}:${seconds}`
+                const durationString = `${hours > 0 ? hours.toString().padStart(2, "0") + ":" : ""}${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
                 queueStringBuilder += `\n\`${i}. [${durationString}]\` **${s.title}**`
             });
             message.channel.send(queueStringBuilder);
