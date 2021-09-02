@@ -22,6 +22,11 @@ require("dotenv").config({ path: __dirname + "../../environment.env" });
 
 const ACCESS_TOKEN = process.env.DISCORD_KEY;
 
+console.log(process.env.DISCORD_KEY)
+console.log(process.env.MONGODB_USER)
+console.log(process.env.MONGODB_PASSWORD)
+console.log(process.env.MONGODB_CLUSTER_URL)
+
 // const isProductionEnv = process.env.NODE_ENV === "production";
 
 // Setup discord client
