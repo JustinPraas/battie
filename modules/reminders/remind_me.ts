@@ -166,10 +166,11 @@ function scheduleJobForRemindMe(
     activeRemindersMap.set(id, job);
 
     if (sendMessage) {
+        const timezoneOffsetHours = date.getTimezoneOffset() / -60;
         channel.send(
             `Komt voor de bakker. Reminder staat gescheduled op **${getFriendlyDate(
                 date
-            )}**`
+            )}** (UTC ${timezoneOffsetHours > 0 ? "+" + timezoneOffsetHours : timezoneOffsetHours})`
         );
     }
 
