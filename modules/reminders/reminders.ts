@@ -1,9 +1,9 @@
 import { User } from "discord.js";
 import { FindCursor } from "mongodb";
 import { Job } from "node-schedule";
-import { battieDb } from "../../main";
+import { battieDb } from "../../main/mongodb";
 import { Command } from "../../models/Command";
-import { getFriendlyDate } from "../../utils";
+import { getFriendlyDate } from "../../util/utils";
 import { reminderCommands, RemindMeDocument } from "./reminders-module";
 import { activeRemindersMap } from "./remind_me";
 

@@ -1,7 +1,7 @@
-import { EmojiIdentifierResolvable, GuildEmoji } from "discord.js";
-import { log } from "../../main";
+import { GuildEmoji } from "discord.js";
+import { log } from "../../main/main";
 import { Command } from "../../models/Command";
-import { shuffle } from "../../utils";
+import { shuffle } from "../../util/utils";
 
 const COMMAND = "poll"
 

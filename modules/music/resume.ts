@@ -1,5 +1,5 @@
 import { Command } from "../../models/Command";
-import { reactWithDefaultEmoji } from "../../utils";
+import { reactWithDefaultEmoji } from "../../util/utils";
 import { guildMusicQueueMap } from "./music-module";
 
 const COMMAND = "resume";

@@ -2,7 +2,7 @@ import { Command } from "../../models/Command";
 import * as path from "path";
 import * as fs from "fs";
 import { SOUND_FILES_DIR_REL_PATH } from "./sounds-module";
-import { COMMAND_PREFIX } from "../../main";
+import { COMMAND_PREFIX } from "../../main/discord";
 
 const COMMAND = "sounds"
 

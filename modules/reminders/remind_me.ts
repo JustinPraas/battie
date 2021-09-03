@@ -1,8 +1,10 @@
 import { DMChannel, Message, NewsChannel, TextChannel, User } from "discord.js";
 import { Job, RecurrenceRule, scheduleJob } from "node-schedule";
-import { battieDb, client, log } from "../../main";
+import { discordClient } from "../../main/discord";
+import { log } from "../../main/main";
+import { battieDb } from "../../main/mongodb";
 import { Command } from "../../models/Command";
-import { getFriendlyDate, sleep } from "../../utils";
+import { getFriendlyDate, sleep } from "../../util/utils";
 import { RemindMeDocument } from "./reminders-module";
 
 const COMMAND = "remindme";
@@ -201,8 +203,8 @@ export async function instantiateSchedulesFromDatabase() {
 
             if (date > new Date(Date.now())) {
                 const content = reminder.content;
-                const userPromise = client.users.fetch(reminder.discordId);
-                const channelPromise = client.channels.fetch(
+                const userPromise = discordClient.users.fetch(reminder.discordId);
+                const channelPromise = discordClient.channels.fetch(
                     reminder.channelId
                 );
 

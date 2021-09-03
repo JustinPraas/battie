@@ -1,5 +1,5 @@
 import { Command } from "../../models/Command";
-import { getHoursFromSeconds, getMinutesFromSeconds, getSecondsFromSeconds } from "../../utils";
+import { getHoursFromSeconds, getMinutesFromSeconds, getSecondsFromSeconds } from "../../util/utils";
 import { guildMusicQueueMap, QueueConstruct } from "./music-module";
 
 const COMMAND = "queue";

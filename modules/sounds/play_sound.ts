@@ -7,7 +7,7 @@ import {
     guildMusicQueueMap,
 } from "../music/music-module";
 import { TextChannel } from "discord.js";
-import { reactWithDefaultEmoji } from "../../utils";
+import { reactWithDefaultEmoji } from "../../util/utils";
 
 const COMMAND = "sound";
 const SUPPORTED_FILETYPES = ["mp3", "mp4", "wav"];

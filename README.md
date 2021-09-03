@@ -12,4 +12,4 @@ Hoe run je de bot:
 
 Voor op de Raspberry Pi:
 
-Gebruik 'screen' om de bot op de achtergrond te runnen op de Pi, zonder dat het proces stopt wanneer je de ssh connectie sluit
+Gebruik 'screen' om de bot op de achtergrond te runnen op de Pi, zonder dat het proces stopt wanneer je de ssh connectie sluit  

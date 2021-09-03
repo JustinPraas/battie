@@ -1,7 +1,7 @@
 import { Guild, Message, TextChannel, VoiceChannel } from "discord.js";
 import yts from "yt-search";
 import ytdl, { MoreVideoDetails } from "ytdl-core";
-import { log } from "../../main";
+import { log } from "../../main/main";
 import { Command } from "../../models/Command";
 import { getEmptyQueueConstruct, guildMusicQueueMap, Song } from "./music-module";
 

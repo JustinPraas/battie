@@ -1,9 +1,10 @@
 import { Client, Message, User } from "discord.js";
 import { Db, Document, FindCursor } from "mongodb";
 import { RecurrenceRule, scheduleJob } from "node-schedule";
-import { battieDb, log } from "../../main";
+import { log } from "../../main/main";
+import { battieDb } from "../../main/mongodb";
 import { Command } from "../../models/Command";
-import { reactWithDefaultEmoji } from "../../utils";
+import { reactWithDefaultEmoji } from "../../util/utils";
 
 interface HydrationSubscriberDocument {
     discordId: string;

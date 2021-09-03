@@ -1,7 +1,7 @@
 import { TextChannel, User } from "discord.js";
-import { log } from "../../main";
+import { log } from "../../main/main";
 import { Command } from "../../models/Command";
-import { reactWithDefaultEmoji } from "../../utils";
+import { reactWithDefaultEmoji } from "../../util/utils";
 import { getEmptyQueueConstruct, guildMusicQueueMap, QueueConstruct } from "./music-module";
 
 const DC_COMMAND = "dc";

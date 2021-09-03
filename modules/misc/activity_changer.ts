@@ -1,8 +1,9 @@
 import { ActivityOptions, Client } from "discord.js";
 import { Job, RecurrenceRule, scheduleJob } from "node-schedule";
-import { client, log } from "../../main";
+import { discordClient } from "../../main/discord";
+import { log } from "../../main/main";
 import { Command } from "../../models/Command";
-import { reactWithDefaultEmoji } from "../../utils";
+import { reactWithDefaultEmoji } from "../../util/utils";
 
 let activityChangerJob: Job | undefined = undefined;
 
@@ -98,15 +99,15 @@ export const setActivity: Command = {
             switch (type.toUpperCase()) {
                 case "LISTENING":
                     log.debug("gedaan")
-                    client.user?.setActivity(activity, { type: "LISTENING" });
+                    discordClient.user?.setActivity(activity, { type: "LISTENING" });
                     reactWithDefaultEmoji(message, "👍🏼");
                     break;
                 case "WATCHING":
-                    client.user?.setActivity(activity, { type: "WATCHING" });
+                    discordClient.user?.setActivity(activity, { type: "WATCHING" });
                     reactWithDefaultEmoji(message, "👍🏼");
                     break;
                 case "PLAYING":
-                    client.user?.setActivity(activity, { type: "PLAYING" });
+                    discordClient.user?.setActivity(activity, { type: "PLAYING" });
                     reactWithDefaultEmoji(message, "👍🏼");
                     break;
             }

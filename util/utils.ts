@@ -1,5 +1,4 @@
 import { Message } from "discord.js";
-import { client } from "./main";
 
 export function shuffle(array: any[]) {
     var currentIndex = array.length,

@@ -1,13 +1,13 @@
-import { commandList, COMMAND_PREFIX } from "../main";
-import { Command } from "../models/Command";
+import { commandList, COMMAND_PREFIX } from "../../main/discord";
+import { Command } from "../../models/Command";
 
-export const helpCommand: Command = {
-    name: "help",
-    format: "help [command_name]",
+const COMMAND = "help"
+
+export const help: Command = {
+    name: COMMAND,
+    format: `${COMMAND} [command_name]`,
     description: "Geeft een overzicht van alle beschikbare commands.",
     execute(message, args) {
-        const channel = message.channel;
-
         const commandName = args.shift();
 
         // Als een command name is meegegeven, geef een overzicht van dat command
@@ -15,7 +15,7 @@ export const helpCommand: Command = {
             const command = commandList.find((c) => c.name === commandName);
 
             if (!command) {
-                channel.send(
+                message.channel.send(
                     `Er is helaas geen command met de naam ${commandName}. Probeer een andere command.`
                 );
                 return;
@@ -26,7 +26,7 @@ export const helpCommand: Command = {
                 printString += `Beschrijving:   \t ${command.description}\n`;
                 printString += "```";
 
-                channel.send(printString);
+                message.channel.send(printString);
             }
         }
 
@@ -42,7 +42,7 @@ export const helpCommand: Command = {
 
             printString += "```";
 
-            channel.send(printString);
+            message.channel.send(printString);
         }
     },
 };
