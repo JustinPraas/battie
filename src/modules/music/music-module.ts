@@ -1,4 +1,4 @@
-import { Message, StreamDispatcher, TextChannel, VoiceChannel, VoiceConnection } from "discord.js";
+import { StreamDispatcher, TextChannel, VoiceChannel, VoiceConnection } from "discord.js";
 import { disconnect, summon } from "./summon-disconnect";
 import { nowPlaying } from "./now-playing";
 import { pause } from "./pause";

@@ -1,6 +1,6 @@
 import { Command } from "../../models/Command";
 import { reactWithDefaultEmoji } from "../../util/utils";
-import { guildMusicQueueMap, QueueConstruct } from "./music-module";
+import { guildMusicQueueMap } from "./music-module";
 
 const COMMAND = "pause";
 
