@@ -4,8 +4,8 @@
     "description": "een simpele discord bot (leren) maken",
     "main": "main.js",
     "scripts": {
-        "tsc": "tsc",
-        "start": "tsc && cpy './static' './build/' --parents && node build/main/main"
+        "tsc": "tsc --build --clean",
+        "start": "tsc --build --clean && cpy './static' './build/' --parents && node build/main/main"
     },
     "repository": {
         "type": "git",
