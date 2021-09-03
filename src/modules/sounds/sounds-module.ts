@@ -1,6 +1,5 @@
-// import { getSound } from "./get_sound";
-// import { playSound } from "./play_sound";
-// import { uploadSound } from "./upload_sound";
+import { listSounds } from "./get_sounds";
+import { registerSound } from "./register_sound";
+import { soundboard } from "./soundboard";
 
-// export const SOUND_FILES_DIR_REL_PATH = "../../static/sound-files"
-// export const soundsCommands = [ getSound, playSound, uploadSound ]
+export const soundsCommands = [ soundboard, registerSound, listSounds ]

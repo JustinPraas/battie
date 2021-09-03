@@ -4,7 +4,7 @@ import { guildMusicSubscriptionMap } from "./music-module";
 export const nowPlaying: Command = {    
     command:
     {
-        name: 'np',
+        name: 'now-playing',
         description: 'Toont de track die momenteel afgespeeld wordt',
     },
     async execute(interaction) {

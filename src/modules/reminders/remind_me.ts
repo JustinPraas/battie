@@ -5,7 +5,7 @@ import { discordClient } from "../../main/discord";
 import { log } from "../../main/main";
 import { battieDb } from "../../main/mongodb";
 import { Command } from "../../models/Command";
-import { getFriendlyDate, sleep } from "../../util/utils";
+import { sleep } from "../../util/utils";
 import { RemindMeDocument } from "./reminders-module";
 
 const COMMAND = "remindme";

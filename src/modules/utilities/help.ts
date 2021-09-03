@@ -44,15 +44,12 @@ export const help: Command = {
 
         // Anders geef een overzicht van alle commands
         else {
-            let printString = "```";
-            printString += `Voor een uitgebreid overzicht van de verschillende commands, gebruik /help <command>`;
+            let printString = "";
+            printString += `Voor een uitgebreid overzicht van de verschillende commands, gebruik \`/help <command>\`\n`;
 
             commandList.forEach((c) => {
-                const paddedCommandName = c.command.name.padEnd(15)
-                printString += `${paddedCommandName}\n`;
+                printString += `*${c.command.name}*\n`;
             });
-
-            printString += "```";
 
             await interaction.reply(printString);
             return;

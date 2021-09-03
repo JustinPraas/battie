@@ -9,6 +9,7 @@ import { musicCommands } from "../modules/music/music-module";
 import { reminderCommands } from "../modules/reminders/reminders-module";
 import { utilityCommands } from "../modules/utilities/utilities-module";
 import { mongoClient } from "./mongodb";
+import { soundsCommands } from "../modules/sounds/sounds-module";
 
 const guildIds = ["658627142908903427"]
 
@@ -58,7 +59,7 @@ export const COMMAND_PREFIX = isProduction ? "$" : "%";
 
 // Get all desired commands that the server should handle
 export const commandList: Command[] = [
-    // ...soundsCommands,
+    ...soundsCommands,
     ...utilityCommands,
     ...miscCommands,
     ...musicCommands,
