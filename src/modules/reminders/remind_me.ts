@@ -1,4 +1,5 @@
-import { DMChannel, Message, NewsChannel, TextChannel, User } from "discord.js";
+import { DMChannel, Message, NewsChannel, TextBasedChannels, TextChannel, User } from "discord.js";
+import { InsertOneResult } from "mongodb";
 import { Job, RecurrenceRule, scheduleJob } from "node-schedule";
 import { discordClient } from "../../main/discord";
 import { log } from "../../main/main";
@@ -12,33 +13,76 @@ const COMMAND = "remindme";
 export const activeRemindersMap = new Map<string, Job>();
 
 export const remindMe: Command = {
-    name: COMMAND,
-    format: `${COMMAND} <in | on> <x days/minutes/hours/seconds | date and time>; <content>`,
-    description:
-        "Helpt je herinneren aan iets op de gegeven datum en/of tijd. Als er geen datum is gegeven, dan wordt je herinnert op de eerst volgende instantie van <time>. Als er geen tijd is gegeven, dan wordt je herinnert op de aangegeven dag op de tijd herinnert waarop je de herinnering hebt aangemaakt.",
-    execute(message, args) {
-        const atOrOn = args.shift();
+    command:
+    {
+        name: 'remindme',
+        description: 'Helpt je herinneren aan iets op de gegeven datum en/of tijd',
+        options: [
+            {
+                choices: [
+                    {
+                        name: "in",
+                        value: "in",
+                    },
+                    {
+                        name: "on",
+                        value: "on",
+                    }
+                ],
+                name: 'type',
+                type: 'STRING' as const,
+                description: "Kies uit 'in' of 'on', afhankelijk van je bedoeling",
+                required: true,
+            },
+            {
+                name: 'timeindication',
+                type: 'STRING' as const,
+                description: 'De tijdsaanduiding voor de reminder',
+                required: true,
+            },
+            {
+                name: 'content',
+                type: 'STRING' as const,
+                description: 'Hetgene waarvoor je herinnerd wilt worden',
+                required: true,
+            },
+        ],
+    },
+    async execute(interaction) {
+        const atOrOn = interaction.options.get('type')!.value! as string;
 
         if (atOrOn != "in" && atOrOn != "on") {
-            message.channel.send(
-                `Ik snap je command niet. Gebruik het volgende formaat: ${this.format}`
+            await interaction.reply(
+                `Ik snap je command format niet.`
             );
         }
 
         // Dissect command parts
-        const user: User = message.author;
-        const argsCombined = args.join(" ");
-        const dateAndTimePart = argsCombined.split(";")[0];
-        const content = argsCombined.split(";")[1];
+        const user: User = interaction.member!.user as User;
+
+        const dateAndTimePart = interaction.options.get('timeindication')!.value! as string;
+        const content = interaction.options.get('content')!.value! as string;
 
         if (!content || content.length == 0) {
-            return message.channel.send("Waar wil je aan herinnerd worden???");
+            await interaction.reply("Waar wil je aan herinnerd worden???");
+            return
         }
 
+        let success = false
         if (atOrOn == "on") {
-            scheduleOn(message, user, dateAndTimePart, content);
+            success = await scheduleOn(interaction.channel!, user, dateAndTimePart, content);
+
+            if (success) {
+                await interaction.reply("Komt voor de bakker. Reminder staat gescheduled op " + dateAndTimePart)
+                return
+            }
         } else if (atOrOn == "in") {
-            scheduleIn(message, user, dateAndTimePart, content);
+            success = await scheduleIn(interaction.channel!, user, dateAndTimePart, content);
+
+            if (success) {
+                await interaction.reply("Komt voor de bakker. Reminder staat gescheduled over " + dateAndTimePart)
+                return
+            }
         }
     },
 };
@@ -48,7 +92,7 @@ const ACCEPTED_HOURS_STRINGS = ["hours", "uren", "h", "u", "uur", "hour"];
 const ACCEPTED_MINUTES_STRINGS = ["minutes", "minuten", "mins", "min", "m", "minuut", "minute"];
 const ACCEPTED_SECONDS_STRINGS = ["seconds", "seconden", "s", "secondes", "seconde", "second", "sec"];
 function scheduleIn(
-    message: Message,
+    channel: TextBasedChannels,
     user: User,
     dateAndTimePart: string,
     content: string
@@ -83,45 +127,50 @@ function scheduleIn(
                     scheduleTimeBuilder.getTime() + number * 1000
                 );
             } else {
-                return message.channel.send(
+                channel.send(
                     "Er is helaas toch iets fout gegaan bij het verwerken van de data"
                 );
+                return Promise.resolve(false)
             }
         }
 
-        scheduleRemindMe(scheduleTimeBuilder, content, user, message.channel);
+        return scheduleRemindMe(scheduleTimeBuilder, content, user, channel);
+    } else {
+        return Promise.resolve(false)
     }
 }
 
-function scheduleOn(
-    message: Message,
+async function scheduleOn(
+    channel: TextBasedChannels,
     user: User,
     dateAndTimePart: string,
     content: string
 ) {
     const parsedDateTime = new Date(Date.parse(dateAndTimePart));
     if (parsedDateTime && !Number.isNaN(parsedDateTime)) {
-        scheduleRemindMe(parsedDateTime, content, user, message.channel);
+        return await scheduleRemindMe(parsedDateTime, content, user, channel);
     } else {
-        return message.channel.send(
+        channel.send(
             "Ik kan je gegeven datum en tijd helaas niet verwerken. Probeer eens hetvolgende:\n" +
-                "```\n" +
-                `\$${COMMAND} aug 7 2021, 18:32; zet de container aan de weg \n` +
-                "```"
+            "```\n" +
+            `\$${COMMAND} aug 7 2021, 18:32; zet de container aan de weg \n` +
+            "```"
         );
+        return false;
     }
 }
 
-function scheduleRemindMe(
+async function scheduleRemindMe(
     date: Date,
     content: string,
     user: User,
-    channel: TextChannel | DMChannel | NewsChannel
+    channel: TextBasedChannels
 ) {
     const randomString = (
         Math.random().toString(36).substring(5, 15) +
         Math.random().toString(36).substring(10, 15)
     ).substring(0, 5);
+
     const remindMeDocument: RemindMeDocument = {
         id: randomString,
         discordId: user.id,
@@ -132,53 +181,43 @@ function scheduleRemindMe(
 
     if (battieDb) {
         const collection = battieDb.collection("reminders");
-        collection.insertOne(remindMeDocument).then((response) => {
-            if (response.acknowledged) {
-                scheduleJobForRemindMe(
-                    randomString,
-                    date,
-                    channel,
-                    user,
-                    content,
-                    true
-                );
-            } else {
-                channel.send(
-                    "Er is wat mis gegaan bij het opslaan van de remindme..."
-                );
-            }
-        });
+        const response: InsertOneResult<Document> = await collection.insertOne(remindMeDocument)
+        if (response.acknowledged) {
+            return scheduleJobForRemindMe(
+                randomString,
+                date,
+                channel,
+                user,
+                content
+            );
+        } else {
+            channel.send(
+                "Er is wat mis gegaan bij het opslaan van de remindme..."
+            );
+            return false
+        }
+    } else {
+        return false
     }
 }
 
 function scheduleJobForRemindMe(
     id: string,
     date: Date,
-    channel: TextChannel | DMChannel | NewsChannel,
+    channel: TextBasedChannels,
     user: User,
-    content: string,
-    sendMessage: boolean
+    content: string
 ) {
     const job = scheduleJob(date, () =>
         channel.send(
             `<@${user}>, ik heb een herinnering voor je: **${content}**`
         )
     );
-
     activeRemindersMap.set(id, job);
-
-    if (sendMessage) {
-        const timezoneOffsetHours = date.getTimezoneOffset() / -60;
-        channel.send(
-            `Komt voor de bakker. Reminder staat gescheduled op **${getFriendlyDate(
-                date
-            )}** (UTC ${timezoneOffsetHours > 0 ? "+" + timezoneOffsetHours : timezoneOffsetHours})`
-        );
-    }
-
     log.info(
         `Scheduled a reminder for user ${user.username} on ${date}: ${content}`
     );
+    return true
 }
 
 export async function instantiateSchedulesFromDatabase() {
@@ -218,8 +257,7 @@ export async function instantiateSchedulesFromDatabase() {
                             date,
                             channel,
                             user,
-                            content,
-                            false
+                            content
                         );
                     })
                     .catch((err) => {

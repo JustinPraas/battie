@@ -1,31 +1,31 @@
 import { Command } from "../../models/Command";
-import { reactWithDefaultEmoji } from "../../util/utils";
-import { guildMusicQueueMap } from "./music-module";
-
-const COMMAND = "resume";
+import { guildMusicSubscriptionMap } from "./music-module";
 
 export const resume: Command = {
-    name: COMMAND,
-    format: `${COMMAND}`,
-    description: "Zorgt ervoor dat de Battiebot het huidige nummer hervat",
-    execute(message, _) {
-        const guild = message.guild;
+    command: 
+    {
+        name: 'resume',
+        description: 'Hervat de huidige track',
+    },
+    async execute(interaction) {
+        const guild = interaction.guild;
 
         if (!guild) {
-            return message.channel.send("Dit kan je alleen in een server uitvoeren")
+            await interaction.reply("Dit kan je alleen in een server uitvoeren")
+            return
         }
 
-        const guildMusicQueue = guildMusicQueueMap.get(guild.id);
-        if (!guildMusicQueue) {
-            return message.channel.send("Ik kan geen liedjes resumen ALS ER GEEN LIEDJES IN DE QUEUE STAAN :@")
+        const subscription = guildMusicSubscriptionMap.get(guild.id);
+        if (!subscription) {
+            await interaction.reply("Ik kan geen tracks resumen ALS ER GEEN TRACKS IN DE QUEUE STAAN :@")
+            return
         }
 
-        const dispatcher = guildMusicQueue.dispatcher;
-        if (!dispatcher) {
-            return message.channel.send("Ik kan geen dispatcher vinden om te resumen");
-        }
-
-        dispatcher.resume();
-        reactWithDefaultEmoji(message, "👍🏼");  
+        if (subscription) {
+			subscription.audioPlayer.unpause();
+			await interaction.reply("De track wordt hervat");
+		} else {
+			await interaction.reply('Ik speel niets af in deze server!');
+		}
     },
 };

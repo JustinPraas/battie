@@ -1,47 +1,27 @@
 import { Command } from "../../models/Command";
-import { guildMusicQueueMap, QueueConstruct } from "./music-module";
+import { guildMusicSubscriptionMap } from "./music-module";
 
-const COMMAND = "np";
-
-export const nowPlaying: Command = {
-    name: COMMAND,
-    format: `${COMMAND}`,
-    description: "Laat zien welk nummer er momenteel afgespeeld wordt",
-    execute(message, _) {
-        const guild = message.guild;
+export const nowPlaying: Command = {    
+    command:
+    {
+        name: 'np',
+        description: 'Toont de track die momenteel afgespeeld wordt',
+    },
+    async execute(interaction) {
+        const guild = interaction.guild;
 
         if (!guild) {
-            return message.channel.send(
+            await interaction.reply(
                 "Dit kan je alleen in een server uitvoeren"
             );
+            return
         }
-
-        const guildMusicQueue: QueueConstruct = guildMusicQueueMap.get(
-            guild.id
-        )!;
-
-        if (!guildMusicQueue || !guildMusicQueue.songs[0]) {
-            return message.channel.send("Er wordt momenteel niets afgespeeld");
-        }
-
-        const currentSong = guildMusicQueue.songs[0];
-        const dispatcher = guildMusicQueue.dispatcher;
-
-        if (!dispatcher) {
-            return message.channel.send("Er is geen Dispatcher, wtf?");
-        }
-
-        const currentTimeMillis = dispatcher.totalStreamTime;
-        let timeString = "";
-
-        if (currentTimeMillis < 3600 * 1000) {
-            timeString = new Date(currentTimeMillis).toISOString().substr(14, 5);
+       
+        const subscription = guildMusicSubscriptionMap.get(guild.id);
+        if (subscription) {
+            await interaction.reply(`Ik speel momenteel: ${subscription.queue[0]}`);
         } else {
-            timeString = new Date(currentTimeMillis).toISOString().substr(11, 8);
+            await interaction.reply('Ik speel niets af in deze server!');
         }
-        
-        message.channel.send(
-            `Ik speel momenteel **${currentSong.title}** op tijdstip **${timeString}**`
-        );
     },
 };

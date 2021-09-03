@@ -4,54 +4,58 @@ import { Job } from "node-schedule";
 import { battieDb } from "../../main/mongodb";
 import { Command } from "../../models/Command";
 import { getFriendlyDate } from "../../util/utils";
-import { reminderCommands, RemindMeDocument } from "./reminders-module";
+import { RemindMeDocument } from "./reminders-module";
 import { activeRemindersMap } from "./remind_me";
 
-const COMMAND = "reminders";
-
 export const reminders: Command = {
-    name: COMMAND,
-    format: `${COMMAND} [remove <id>]`,
-    description:
-        "Toont jouw actieve reminders, of verwijdert de reminder met de aangegeven ID. Zie `$help reminders` voor meer info.",
-    execute(message, args) {
-        const user: User = message.author;
-        const remove = args.shift() == "remove";
+    command:
+    {
+        name: 'reminders',
+        description: 'Toont jouw actieve reminders, of verwijdert de reminder met de aangegeven ID',
+        options: [
+            {
+                name: 'remove',
+                type: 'STRING' as const,
+                description: 'Optionele parameter om een reminder te verwijderen',
+                required: false,
+            },
+        ],
+    },
+    async execute(interaction) {
+        const user: User = interaction.member!.user as User;
+
+        const removeId = interaction.options.get('remove')
 
         if (battieDb) {
             const collection = battieDb.collection("reminders");
-            if (remove) {
-                const id = args.shift();
-                if (!id) {
-                    return message.channel.send(
-                        "Je moet dan wel een ID meegeven van de reminder"
-                    );
-                }
-
-                collection.deleteOne({ id: id }).then((response) => {
+            if (removeId && removeId.value) {
+                collection.deleteOne({ id: removeId.value }).then(async (response) => {
                     if (response.deletedCount > 0) {
                         const foundReminderJob: Job | undefined =
-                            activeRemindersMap.get(id);
+                            activeRemindersMap.get(removeId.value!.toString());
                         if (foundReminderJob != undefined) {
                             foundReminderJob.cancel();
-                            message.channel.send("Je reminder is verwijdert");
+                            await interaction.reply("Je reminder is verwijdert");
+                            return
                         } else {
-                            message.channel.send(
+                            await interaction.reply(
                                 "Er ging iets mis bij het verwijderen van de reminder"
                             );
+                            return
                         }
                     } else {
-                        message.channel.send(
+                        await interaction.reply(
                             "Je reminder kon niet verwijdert worden"
                         );
+                        return
                     }
                 });
             } else {
                 const myReminders: FindCursor<RemindMeDocument> = collection
-                    .find({ discordId: user.id, timestamp: {$gt: Date.now()} })
+                    .find({ discordId: user.id, timestamp: { $gt: Date.now() } })
                     .map((value) => value as RemindMeDocument);
 
-                myReminders.count().then((count) => {
+                myReminders.count().then(async (count) => {
                     if (count > 0) {
                         let myRemindersStringBuilder =
                             "Dit zijn jouw reminders:";
@@ -63,15 +67,16 @@ export const reminders: Command = {
                                 const date = new Date(reminder.timestamp);
                                 myRemindersStringBuilder += `\n\`${reminder.id.padEnd(
                                     8
-                                )}${getFriendlyDate(date).padEnd(28)}${
-                                    reminder.content
-                                }\``;
+                                )}${getFriendlyDate(date).padEnd(28)}${reminder.content
+                                    }\``;
                             })
-                            .then(() => {
-                                message.channel.send(myRemindersStringBuilder);
+                            .then(async () => {
+                                await interaction.reply(myRemindersStringBuilder);
+                                return
                             });
                     } else {
-                        message.channel.send("Je hebt geen actieve reminders");
+                        await interaction.reply("Je hebt geen actieve reminders");
+                        return
                     }
                 });
             }

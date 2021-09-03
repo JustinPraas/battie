@@ -3,7 +3,6 @@ import { Job, RecurrenceRule, scheduleJob } from "node-schedule";
 import { discordClient } from "../../main/discord";
 import { log } from "../../main/main";
 import { Command } from "../../models/Command";
-import { reactWithDefaultEmoji } from "../../util/utils";
 
 let activityChangerJob: Job | undefined = undefined;
 
@@ -74,46 +73,60 @@ const activities: Activity[] = [
     },
 ];
 
-const COMMAND = "set-activity";
-
-const acceptedTypes = ["PLAYING", "WATCHING", "LISTENING"];
 export const setActivity: Command = {
-    name: COMMAND,
-    format: `${COMMAND} <PLAYING|WATCHING|LISTENING> <activity>`,
-    description: "Zet de activity van de bot naar de gespecificeerde activity",
-    execute(message, args) {
-        const type = args.shift();
+    command:
+    {
+        name: 'set-activity',
+        description: 'Zet de activity van de bot naar de gespecificeerde activity',
+        options: [
+            {
+                choices: [
+                    {
+                        name: "playing",
+                        value: "PLAYING",
+                    },
+                    {
+                        name: "watching",
+                        value: "WATCHING",
+                    },
+                    {
+                        name: "listening",
+                        value: "LISTENING",
+                    }
+                ],
+                name: 'type',
+                type: 'STRING' as const,
+                description: 'Het type van de activiteit',
+                required: true,
+            },
+            {
+                name: 'activity',
+                type: 'STRING' as const,
+                description: 'De activiteit. Tip: maak er een korte zin van, zodat het goed te zien is in de members list ',
+                required: true,
+            },
+        ],
+    },
+    async execute(interaction) {
 
-        if (!type || !acceptedTypes.includes(type.toUpperCase())) {
-            return message.channel.send(
-                "Geef een geldig type op.. Zie de command format"
-            );
-        } else {
-            const activity = args.join(" ");
-            if (!activity || activity.length == 0) {
-                return message.channel.send(
-                    "Je moet wel een activity opgeven maat..."
-                );
-            }
+        const type = interaction.options.get('type')!.value! as string;
+        const activity = interaction.options.get('activity')!.value! as string;
 
-            switch (type.toUpperCase()) {
-                case "LISTENING":
-                    log.debug("gedaan")
-                    discordClient.user?.setActivity(activity, { type: "LISTENING" });
-                    reactWithDefaultEmoji(message, "👍🏼");
-                    break;
-                case "WATCHING":
-                    discordClient.user?.setActivity(activity, { type: "WATCHING" });
-                    reactWithDefaultEmoji(message, "👍🏼");
-                    break;
-                case "PLAYING":
-                    discordClient.user?.setActivity(activity, { type: "PLAYING" });
-                    reactWithDefaultEmoji(message, "👍🏼");
-                    break;
-            }
-
-            activityChangerJob?.cancelNext()
+        switch (type.toUpperCase()) {
+            case "LISTENING":
+                discordClient.user?.setActivity(activity, { type: "LISTENING" });
+                break;
+            case "WATCHING":
+                discordClient.user?.setActivity(activity, { type: "WATCHING" });
+                break;
+            case "PLAYING":
+                discordClient.user?.setActivity(activity, { type: "PLAYING" });
+                break;
         }
+
+        interaction.reply("Klaar :)")
+
+        activityChangerJob?.cancelNext()
     },
 };
 

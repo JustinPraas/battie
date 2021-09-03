@@ -1,96 +1,78 @@
-import { TextChannel, User } from "discord.js";
+import { joinVoiceChannel } from "@discordjs/voice";
+import { GuildMember, User } from "discord.js";
 import { log } from "../../main/main";
 import { Command } from "../../models/Command";
-import { reactWithDefaultEmoji } from "../../util/utils";
-import { getEmptyQueueConstruct, guildMusicQueueMap, QueueConstruct } from "./music-module";
-
-const DC_COMMAND = "dc";
+import { MusicSubscription } from "../../models/MusicSubscription";
+import { guildMusicSubscriptionMap } from "./music-module";
 
 export const disconnect: Command = {
-    name: DC_COMMAND,
-    format: `${DC_COMMAND}`,
-    description: "Zorgt ervoor dat de Battiebot stopt met muziek afspelen",
-    execute(message, _) {
-        const guild = message.guild;
+    command: 
+    {
+        name: 'leave',
+        description: 'De bot verlaat zijn voice channel',
+    },
+    async execute(interaction) {
+        const guild = interaction.guild;
 
         if (!guild) {
-            return message.channel.send(
+            await interaction.reply(
                 "Dit kan je alleen in een server uitvoeren"
             );
+            return
         }
 
-        const guildMusicQueue = guildMusicQueueMap.get(guild.id);
+        const subscription = guildMusicSubscriptionMap.get(guild.id);
 
-        if (!guildMusicQueue || !guildMusicQueue.voiceChannel) {
-            return message.channel.send(
-                "Ik blijk niet eens actief te zijn... waarom wil je me zo graag weg hebben???"
-            );
-        }
-
-        guildMusicQueue.voiceChannel.leave();
-        guildMusicQueueMap.delete(guild.id);
-
-        reactWithDefaultEmoji(message, "👍🏼");
+        if (subscription) {
+			subscription.voiceConnection.destroy();
+			guildMusicSubscriptionMap.delete(guild.id);
+			await interaction.reply("Doei!");
+		} else {
+			await interaction.reply('Ik speel niets af in deze server!');
+		}
     },
 };
 
-const SUMMON_COMMAND = "summon";
-
-export const summon: Command = {
-    name: SUMMON_COMMAND,
-    format: `${SUMMON_COMMAND}`,
-    description: "Roept mij op in dezelfe voice channel waar jij in zit!",
-    execute(message, _) {
-        const guild = message.guild;
-        const user: User = message.author;
+export const summon: Command = {    
+    command: 
+    {
+        name: 'summon',
+        description: 'Roept mij op in jouw voice channel',
+    },
+    async execute(interaction) {
+        const guild = interaction.guild;
+        const user: User = (interaction.member as GuildMember).user;
 
         if (!guild) {
-            return message.channel.send(
+            await interaction.reply(
                 "Dit kan je alleen in een server uitvoeren"
             );
+            return
         }
 
         const guildMember = guild.members.cache.get(user.id);
         if (!guildMember) {
-            return message.channel.send(
+            await interaction.reply(
                 "Je bent volgens mij geen lid van deze server, hoe dan?"
             );
+            return
         }
 
-        const userVoiceChannel = guildMember.voice.channel;
-        if (!userVoiceChannel) {
-            return message.channel.send(
-                "Je zit niet eens in een voice channel ??"
-            );
-        }
-
-        const guildMusicQueue = guildMusicQueueMap.get(guild.id);
-
-        if (guildMusicQueue) {
-            userVoiceChannel
-                .join()
-                .then(
-                    (voiceConnection) => {
-                        reactWithDefaultEmoji(message, "👍🏼");
-                        guildMusicQueue.connection = voiceConnection
-                        guildMusicQueue.voiceChannel = voiceConnection.channel
-                    }
-                )
-                .catch((e) => log.error(e));
-        } else {
-            const newQueueConstruct: QueueConstruct = getEmptyQueueConstruct()
-            newQueueConstruct.textChannel = message.channel as TextChannel
-            userVoiceChannel
-                .join()
-                .then(
-                    (voiceConnection) => {
-                        reactWithDefaultEmoji(message, "👍🏼");
-                        newQueueConstruct.connection = voiceConnection
-                        newQueueConstruct.voiceChannel = voiceConnection.channel
-                    }
-                )
-                .catch((e) => log.error(e));
-            guildMusicQueueMap.set(guild.id, newQueueConstruct)
-        }
+        let subscription = guildMusicSubscriptionMap.get(guild.id);
+        if (!subscription) {
+			if (interaction.member instanceof GuildMember && interaction.member.voice.channel) {
+				const channel = interaction.member.voice.channel;
+				subscription = new MusicSubscription(
+					joinVoiceChannel({
+						channelId: channel.id,
+						guildId: channel.guild.id,
+						adapterCreator: channel.guild.voiceAdapterCreator,
+					}),
+				);
+				subscription.voiceConnection.on('error', (error) => { log.warn(error) });
+				guildMusicSubscriptionMap.set(guild.id, subscription);
+                await interaction.reply("Hulloo")
+			}
+		}
     },
 };

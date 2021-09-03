@@ -1,42 +1,61 @@
-import { Client, Message, User } from "discord.js";
+import { Client, CommandInteraction, User } from "discord.js";
 import { Db, Document, FindCursor } from "mongodb";
 import { RecurrenceRule, scheduleJob } from "node-schedule";
 import { log } from "../../main/main";
 import { battieDb } from "../../main/mongodb";
 import { Command } from "../../models/Command";
-import { reactWithDefaultEmoji } from "../../util/utils";
 
 interface HydrationSubscriberDocument {
     discordId: string;
 }
 
-const COMMAND = "hydration";
-
 export const hydration: Command = {
-    name: COMMAND,
-    format: `\`${COMMAND} [un]subscribe`,
-    description: "Meld jou aan/af voor de hourly hydration reminder",
-    execute(message, args) {
-        const subParam = args.shift();
-        const user: User = message.author;
+    command:
+    {
+        name: 'hydration-reminder',
+        description: 'Meld jou aan/af voor de hourly hydration reminder',
+        options: [
+            {
+                choices: [
+                    {
+                        name: "on",
+                        value: "on",
+                    },
+                    {
+                        name: "off",
+                        value: "off",
+                    }
+                ],
+                name: 'toggle',
+                type: 'STRING' as const,
+                description: 'Wil je je aan of afmelden voor de reminder?',
+                required: true,
+            },
+        ],
+    },
+    async execute(interaction) {
 
-        if (subParam == "subscribe") {
-            addSubscriber(user, message);
-        } else if (subParam == "unsubscribe") {
-            removeSubscriber(user, message);
+        const toggle = interaction.options.get('toggle')!.value! as string;
+        const user: User = interaction.member!.user as User;
+
+        if (toggle == "on") {
+            await addSubscriber(user, interaction);
+        } else if (toggle == "off") {
+            await removeSubscriber(user, interaction);
         } else {
-            message.channel.send("Wat wil je dat ik doe?");
+            await interaction.reply("Wat wil je dat ik doe?");
         }
     },
 };
 
-function removeSubscriber(user: User, message: Message) {
+function removeSubscriber(user: User, interaction: CommandInteraction) {
     if (battieDb) {
-        isUserSubscribed(user, battieDb).then((value) => {
+        isUserSubscribed(user, battieDb).then(async (value) => {
             if (value == null) {
-                return message.channel.send(
+                await interaction.reply(
                     "Je was niet eens gesubscribed op de hydration reminder!"
                 );
+                return;
             } else {
                 const collection = battieDb!.collection("hydration");
                 const newSub: HydrationSubscriberDocument = {
@@ -45,11 +64,13 @@ function removeSubscriber(user: User, message: Message) {
 
                 collection
                     .deleteOne(newSub)
-                    .then(() => {
-                        reactWithDefaultEmoji(message, "👍🏼");
+                    .then(async () => {
+                        await interaction.reply(
+                            "Je bent nu niet meer gesubscribed op de hydration reminder!"
+                        );
                     })
-                    .catch((err) => {
-                        message.channel.send(
+                    .catch(async (err) => {
+                        await interaction.reply(
                             "Er ging iets fout tijdens het unsubscriben op de hydration reminder... sorry"
                         );
                         log.error(
@@ -62,11 +83,11 @@ function removeSubscriber(user: User, message: Message) {
     }
 }
 
-function addSubscriber(user: User, message: Message) {
+function addSubscriber(user: User, interaction: CommandInteraction) {
     if (battieDb) {
-        isUserSubscribed(user, battieDb).then((value) => {
+        isUserSubscribed(user, battieDb).then(async (value) => {
             if (value != null) {
-                return message.channel.send(
+                await interaction.reply(
                     "Je bent al gesubscribed op de hydration reminder!"
                 );
             } else {
@@ -77,11 +98,13 @@ function addSubscriber(user: User, message: Message) {
 
                 collection
                     .insertOne(newSub)
-                    .then(() => {
-                        reactWithDefaultEmoji(message, "👍🏼");
+                    .then(async () => {
+                        await interaction.reply(
+                            "Je bent nu gesubscribed op de hydration reminder!"
+                        );
                     })
-                    .catch((err) => {
-                        message.channel.send(
+                    .catch(async (err) => {
+                        await interaction.reply(
                             "Er ging iets fout tijdens het subscriben op de hydration reminder... sorry"
                         );
                         log.error(

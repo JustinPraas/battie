@@ -1,31 +1,26 @@
 import { Command } from "../../models/Command";
-import { reactWithDefaultEmoji } from "../../util/utils";
-import { guildMusicQueueMap } from "./music-module";
-
-const COMMAND = "pause";
+import { guildMusicSubscriptionMap } from "./music-module";
 
 export const pause: Command = {
-    name: COMMAND,
-    format: `${COMMAND}`,
-    description: "Zorgt ervoor dat de Battiebot het huidige nummer pauzeert",
-    execute(message, _) {
-        const guild = message.guild;
+    command:
+    {
+        name: 'pause',
+        description: 'Pauzeert de huidige track',
+    },
+    async execute(interaction) {
+        const guild = interaction.guild;
 
         if (!guild) {
-            return message.channel.send("Dit kan je alleen in een server uitvoeren")
+            await interaction.reply("Dit kan je alleen in een server uitvoeren")
+            return
         }
 
-        const guildMusicQueue = guildMusicQueueMap.get(guild.id);
-        if (!guildMusicQueue) {
-            return message.channel.send("Ik kan geen liedjes pauzeren ALS ER GEEN LIEDJES IN DE QUEUE STAAN :@")
+        const subscription = guildMusicSubscriptionMap.get(guild.id);
+        if (subscription) {
+            subscription.audioPlayer.pause();
+            await interaction.reply("Ik heb de track gepauzeert");
+        } else {
+            await interaction.reply('Ik speel niets af in deze server!');
         }
-
-        const dispatcher = guildMusicQueue.dispatcher;
-        if (!dispatcher) {
-            return message.channel.send("Ik kan geen dispatcher vinden om te pauzeren");
-        }
-
-        dispatcher.pause();
-        reactWithDefaultEmoji(message, "👍🏼");
     },
 };

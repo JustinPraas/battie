@@ -1,5 +1,5 @@
 import { isProduction, log } from "./main";
-import Discord from "discord.js";
+import Discord, { CommandInteraction, Intents, Interaction } from "discord.js";
 import { currentActivity, startSchedulingNewActivites } from "../modules/misc/activity_changer";
 import { startSchedulingHydrationReminders } from "../modules/misc/hydration";
 import { instantiateSchedulesFromDatabase } from "../modules/reminders/remind_me";
@@ -7,19 +7,26 @@ import { Command } from "../models/Command";
 import { miscCommands } from "../modules/misc/scheduling-module";
 import { musicCommands } from "../modules/music/music-module";
 import { reminderCommands } from "../modules/reminders/reminders-module";
-import { rolesCommands } from "../modules/roles/roles-module";
-import { soundsCommands } from "../modules/sounds/sounds-module";
 import { utilityCommands } from "../modules/utilities/utilities-module";
 import { mongoClient } from "./mongodb";
 
-export const DISCORD_TOKEN = isProduction ? process.env.DISCORD_KEY : process.env.DISCORD_KEY_BETA;
-export const discordClient = new Discord.Client();
+const guildIds = ["658627142908903427"]
 
-export function loginDiscord() {    
+export const DISCORD_TOKEN = isProduction ? process.env.DISCORD_KEY : process.env.DISCORD_KEY_BETA;
+export const discordClient = new Discord.Client({
+    intents: [
+        Intents.FLAGS.GUILDS,
+        Intents.FLAGS.GUILD_MESSAGES,
+        Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+        Intents.FLAGS.GUILD_VOICE_STATES
+    ]
+});
+
+export function loginDiscord() {
     discordClient.login(DISCORD_TOKEN);
 }
 
-discordClient.once("ready", () => {
+discordClient.once("ready", async () => {
     discordClient.user?.setActivity(currentActivity.activity, currentActivity.options);
 
     startSchedulingNewActivites(discordClient);
@@ -27,13 +34,15 @@ discordClient.once("ready", () => {
     instantiateSchedulesFromDatabase();
 
     log.info(`Battiebot${isProduction ? "" : " (beta)"} is aanwezig`);
+
+    guildIds.forEach(async guildId => {
+        const guild = await discordClient.guilds.fetch(guildId)
+        guild.commands.set(commandList.map(c => c.command));
+    })
 });
 
-discordClient.on("message", (message) => {
-    if (message.content.startsWith(COMMAND_PREFIX)) {
-        handleCommand(message);
-        return;
-    }
+discordClient.on("interactionCreate", async (interaction: Interaction) => {
+    handleCommand(interaction as CommandInteraction);
 });
 
 discordClient.on("disconnect", () => {
@@ -49,8 +58,7 @@ export const COMMAND_PREFIX = isProduction ? "$" : "%";
 
 // Get all desired commands that the server should handle
 export const commandList: Command[] = [
-    ...rolesCommands,
-    ...soundsCommands,
+    // ...soundsCommands,
     ...utilityCommands,
     ...miscCommands,
     ...musicCommands,
@@ -61,21 +69,14 @@ export const commandList: Command[] = [
 const commands = new Discord.Collection<string, Command>();
 
 // Fill the commands collection
-commandList.forEach((command) => commands.set(command.name, command));
+commandList.forEach((command) => commands.set(command.command.name, command));
 
-function handleCommand(message: Discord.Message) {
-    // Get the command and arguments
-    const args = message.content.slice(COMMAND_PREFIX.length).split(/ +/);
-
-    // Get the command and remove it from args array
-    const command = args.shift()?.toLowerCase();
-    if (!command) return;
-
+function handleCommand(interaction: CommandInteraction) {
     // Get the desired client command
-    const clientCommand = commands.get(command);
+    const clientCommand = commands.get(interaction.command?.name!);
 
     // If command exists, execute it
-    if (clientCommand) clientCommand.execute(message, args);
+    if (clientCommand) clientCommand.execute(interaction);
     // Otherwise return
     else return;
 }

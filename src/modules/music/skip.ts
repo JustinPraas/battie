@@ -1,48 +1,47 @@
-import { Message } from "discord.js";
+import { CommandInteraction, GuildMember } from "discord.js";
 import { Command } from "../../models/Command";
-import { reactWithDefaultEmoji } from "../../util/utils";
-import { guildMusicQueueMap, QueueConstruct } from "./music-module";
-
-const COMMAND = "skip";
+import { MusicSubscription } from "../../models/MusicSubscription";
+import { guildMusicSubscriptionMap } from "./music-module";
 
 export const skip: Command = {
-    name: COMMAND,
-    format: `${COMMAND}`,
-    description: "Skipt het liedje die momenteel aan het afspelen is",
-    execute(message, _) {
-        const guild = message.guild;
+    command: {
+        name: 'skip',
+        description: 'Skipt de huidige track',
+    },
+    async execute(interaction) {
+        const guild = interaction.guild;
 
         if (!guild) {
-            return message.channel.send("Dit kan je alleen in een server uitvoeren")
+            await interaction.reply("Dit kan je alleen in een server uitvoeren")
+            return;
         }
 
         // Get server queue
-        const serverQueue = guildMusicQueueMap.get(guild?.id);
-
-        if (!serverQueue) {
-            return message.channel.send("Er staan geen liedjes in de wachtrij o.i.d.")
+        const musicSubscription = guildMusicSubscriptionMap.get(guild?.id);
+        if (!musicSubscription) {
+            await interaction.reply("Er staan geen tracks in de wachtrij o.i.d.")
+            return
         }
 
         // Skip the song
-        skipSong(message, serverQueue);   
+        skipSong(interaction, musicSubscription);
     },
 };
 
-function skipSong(message: Message, serverQueue: QueueConstruct) {
-    if (!message.member?.voice.channel) {
-        return message.channel.send(
-            "Je moet in een voice channel zijn om de muziek te skippen"
+async function skipSong(interaction: CommandInteraction, musicSubscription: MusicSubscription) {
+    const memberVoiceChannel = (interaction.member as GuildMember).voice.channel
+    if (!memberVoiceChannel ) {
+        await interaction.reply(
+            "Je moet in een voice channel zijn om de track te skippen"
         );
+        return;
     }
 
-    if (!serverQueue) {
-        return message.channel.send("Er is geen liedje die ik kan skippen LOL");
-    }
-
-    if (serverQueue.connection && serverQueue.playing) {
-        serverQueue.connection.dispatcher.end();
-        return reactWithDefaultEmoji(message, "👍🏼");
+    if (musicSubscription) {
+        musicSubscription.audioPlayer.stop();
+        await interaction.reply('De track is nu geskipt!');
+        return;
     } else {
-        return message.channel.send("Ik ben geen liedje aan het afspelen...")
+        await interaction.reply('Ik kan nu geen tracks skippen!');
     }
 }

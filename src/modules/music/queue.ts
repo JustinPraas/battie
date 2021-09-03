@@ -1,44 +1,41 @@
+import { AudioPlayerStatus, AudioResource } from "@discordjs/voice";
 import { Command } from "../../models/Command";
-import { getHoursFromSeconds, getMinutesFromSeconds, getSecondsFromSeconds } from "../../util/utils";
-import { guildMusicQueueMap, QueueConstruct } from "./music-module";
-
-const COMMAND = "queue";
+import { Track } from "../../models/Track";
+import { guildMusicSubscriptionMap } from "./music-module";
 
 export const queue: Command = {
-    name: COMMAND,
-    format: `${COMMAND}`,
-    description: "Laat zien welk nummer er in de queue staan",
-    execute(message, _) {
-        const guild = message.guild;
+    command: 
+    {
+        name: 'queue',
+        description: 'Toont de huidige wachtrij van tracks',
+    },
+    async execute(interaction) {
+        const guild = interaction.guild;
 
         if (!guild) {
-            return message.channel.send(
+            await interaction.reply(
                 "Dit kan je alleen in een server uitvoeren"
             );
+            return
         }
 
-        const guildMusicQueue: QueueConstruct = guildMusicQueueMap.get(
+        const subscription = guildMusicSubscriptionMap.get(
             guild.id
-        )!;
-        if (!guildMusicQueue) {
-            return message.channel.send("Er wordt momenteel niets afgespeeld");
-        }
+        );
 
-        const songs = guildMusicQueue.songs;
-        if (songs.length < 2) {
-            message.channel.send("Er staan geen nummers in de wachtrij")
-        } else {
-            let queueStringBuilder = "De volgende nummers staan in de wachtrij:"
-            songs.forEach(s => {
-                const i = songs.indexOf(s) + 1
-                const songDurationSeconds = parseInt(s.lengthSeconds);
-                const hours = getHoursFromSeconds(songDurationSeconds);
-                const minutes = getMinutesFromSeconds(songDurationSeconds);
-                const seconds = getSecondsFromSeconds(songDurationSeconds);
-                const durationString = `${hours > 0 ? hours.toString().padStart(2, "0") + ":" : ""}${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
-                queueStringBuilder += `\n\`${i}. [${durationString}]\` **${s.title}**`
-            });
-            message.channel.send(queueStringBuilder);
-        }
+        if (subscription) {
+			const current =
+				subscription.audioPlayer.state.status === AudioPlayerStatus.Idle
+					? `Ik speel momenteel niets af!`
+					: `Ik speel nu: **${(subscription.audioPlayer.state.resource as AudioResource<Track>).metadata.title}**`;
+
+			const queue = subscription.queue
+				.map((track, index) => `${index + 1}) ${track.title}`)
+				.join('\n');
+
+			await interaction.reply(`${current}\n\n${queue}`);
+		} else {
+			await interaction.reply('Ik speel geen tracks af in deze server!');
+		}
     },
 };
