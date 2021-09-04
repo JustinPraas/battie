@@ -8,6 +8,8 @@ export const log: Logger = new Logger();
 export const isProduction = process.env.PRODUCTION && process.env.PRODUCTION == "true"
 
 function run() {
+    if (isProduction) log.info("Running in production mode...")
+    
     mongoClient.connect().then(() => {
         setBattieDb()
         log.info("Connected to MongoDB database");
