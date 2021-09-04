@@ -8,7 +8,7 @@ import { miscCommands } from "../modules/misc/scheduling-module";
 import { musicCommands } from "../modules/music/music-module";
 import { reminderCommands } from "../modules/reminders/reminders-module";
 import { utilityCommands } from "../modules/utilities/utilities-module";
-import { mongoClient } from "./mongodb";
+import { getMongoClient, mongoClient } from "./mongodb";
 import { soundsCommands } from "../modules/sounds/sounds-module";
 
 const guildIds = ["658627142908903427"]
@@ -50,7 +50,7 @@ discordClient.on("disconnect", () => {
     log.info("Battiebot disconnecting...")
 
     log.info("Disconnecting connection to MongoDb...")
-    mongoClient.close();
+    getMongoClient().close();
 });
 
 
