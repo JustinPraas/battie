@@ -20,7 +20,9 @@ export const queue: Command = {
 					? `Ik speel momenteel niets af!`
 					: `Ik speel nu: **${(subscription.audioPlayer.state.resource as AudioResource<Track>).metadata.title}**`;
 
-			const queue = subscription.queue
+			let queue = "Nummers in de wachtrij:\n"
+            
+            queue += subscription.queue
 				.map((track, index) => `${index + 1}) ${track.title}`)
 				.join('\n');
 

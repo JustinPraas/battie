@@ -4,7 +4,7 @@ import { battieDb } from "../../process/mongodb";
 import { Command } from "../../models/Command";
 import { guildMusicSubscriptionMap } from "../music/_music-commands";
 import { createDiscordJSAdapter } from "./adapter";
-import { RANDOM_SOUND_NAME } from "./_sound-commands";
+import { DEFAULT_VOLUME, RANDOM_SOUND_NAME } from "./_sound-commands";
 import { shuffle } from "../../util/utils";
 
 const player = createAudioPlayer();
@@ -22,9 +22,11 @@ export const soundPlay: Command = {
         }]
     },
     async execute(interaction, guild, _) {
+        await interaction.deferReply()
+
         let subscription = guildMusicSubscriptionMap.get(guild.id)
         if (subscription && (subscription.queue.length > 0 || subscription.audioPlayer.state.status != AudioPlayerStatus.Idle)) {
-            await interaction.reply("Ik kan helaas geen geluiden afspelen terwijl er tracks worden afgespeeld :(")
+            await interaction.followUp("Ik kan helaas geen geluiden afspelen terwijl er tracks worden afgespeeld :(")
             return
         }
 
@@ -40,12 +42,13 @@ export const soundPlay: Command = {
             }
 
             if (!soundDocument) {
-                await interaction.reply("Er bestaat geen sound registratie met deze naam :(")
+                await interaction.followUp("Er bestaat geen sound registratie met deze naam :(")
                 return
             }
 
             const url = soundDocument.url
             const name = soundDocument.name
+            const volume = soundDocument.volume ? soundDocument.volume : DEFAULT_VOLUME;
 
             if (interaction.member instanceof GuildMember && interaction.member.voice.channel) {
 
@@ -67,25 +70,29 @@ export const soundPlay: Command = {
                     voiceConnection.destroy();
                     throw error;
                 }
-                await playSound(url)
-                await interaction.reply(`Ik speel *${name}* af...`)
+                await playSound(url, volume)
+                await interaction.followUp(`Ik speel *${name}* af...`)
+                return
             } else {                
-                await interaction.reply("Ik kon je voice channel niet vinden :(")
+                await interaction.followUp("Ik kon je voice channel niet vinden :(")
                 return
             }
         } else {
-            await interaction.reply("Kon geen connectie vinden met de database :(")
+            await interaction.followUp("Kon geen connectie vinden met de database :(")
             return
         }
     }
 }
 
-function playSound(url: string) {
+function playSound(url: string, volume: number) {
     const resource = createAudioResource(url, {
         inputType: StreamType.Arbitrary,
+        inlineVolume: true,
     });
+
+    resource.volume?.setVolumeLogarithmic(volume)
 
     player.play(resource);
 
-    return entersState(player, AudioPlayerStatus.Playing, 5e3);
+    return entersState(player, AudioPlayerStatus.Playing, 10e3);
 }

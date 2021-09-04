@@ -2,13 +2,11 @@ import { battieDb } from "../../process/mongodb";
 import { Command } from "../../models/Command";
 import { VOLUME_CHOICES } from "./_sound-commands";
 
-const gdriveRegex = /https:\/\/(drive\.google\.com\/file\/d)(.*)(\/view\?usp=sharing)/gm
-
-export const soundEdit: Command = {
+export const soundEditVolume: Command = {
     command:
     {
-        name: 'edit-sound',
-        description: 'Registreer een sound',
+        name: 'edit-sound-volume',
+        description: 'Verandert het volume van de sound',
         options: [{
             name: 'name',
             type: 'STRING' as const,
@@ -16,38 +14,16 @@ export const soundEdit: Command = {
             required: true,
         },
         {
-            name: 'new-name',
-            type: 'STRING' as const,
-            description: 'De naam die je de sound wil geven',
-            required: false,
-        },
-        {
-            name: 'new-url',
-            type: 'STRING' as const,
-            description: 'De url die je aan de sound wilt toevoegen',
-            required: false,
-        },
-        {
-            name: 'gdrive',
-            type: 'BOOLEAN' as const,
-            description: 'Geeft aan of dit een google drive share-url is',
-            required: false,
-        },
-        {
             choices: VOLUME_CHOICES,
             name: 'new-volume',
             type: 'NUMBER' as const,
             description: 'Geeft het aangepaste volume aan van de track',
-            required: false,
+            required: true,
         },
         ]
     },
     async execute(interaction, guild, user) {
-
         const name = interaction.options.get('name')!.value! as string;
-        const newName = interaction.options.get('new-name')?.value! as string;
-        let newUrl = interaction.options.get('new-url')?.value! as string;
-        const gdrive = interaction.options.getBoolean("gdrive")
         const volume = interaction.options.getNumber("new-volume")
 
         if (battieDb) {
@@ -60,28 +36,11 @@ export const soundEdit: Command = {
                 return
             }
 
-            if (!newUrl && !newName) {
-                await interaction.reply("Je wilt dus eigenlijk niets veranderen? Doe even normaal...")
-                return
-            }
-
-            if (newUrl) {
-                if (gdrive) {
-                    if (newUrl.match(gdriveRegex)?.length != 1) {
-                        await interaction.reply("De google drive url is niet geldig... Zorg dat je een publieke share-url gebruikt!")
-                        return
-                    } else {
-                        newUrl = newUrl.replace("file/d/", "uc?id=")
-                        newUrl = newUrl.replace("/view?usp=sharing", "&export=download")
-                    }
-                }
-            }
-
             const acknowledged = (await collection.updateOne({ name: name, guildId: guild.id }, {
                 $set: {
-                    name: newName ? newName : document.name,
+                    name: document.name,
                     guildId: document.guildId,
-                    url: newUrl ? newUrl : document.url,
+                    url: document.url,
                     registeredBy: document.registeredBy,
                     registeredAt: document.registered,
                     volume: volume ? volume : document.volume,

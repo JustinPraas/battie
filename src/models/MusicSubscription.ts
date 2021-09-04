@@ -9,6 +9,7 @@ import {
     VoiceConnectionStatus,
 } from '@discordjs/voice';
 import { promisify } from 'util';
+import { DEFAULT_VOLUME } from '../commands/sounds/_sound-commands';
 import { Track } from './Track';
 
 const wait = promisify(setTimeout);
@@ -136,6 +137,7 @@ export class MusicSubscription {
         try {
             // Attempt to convert the Track into an AudioResource (i.e. start streaming the video)
             const resource = await nextTrack.createAudioResource();
+            resource.volume?.setVolumeLogarithmic(DEFAULT_VOLUME)
             this.audioPlayer.play(resource);
             this.queueLock = false;
         } catch (error) {

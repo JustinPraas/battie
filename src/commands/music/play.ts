@@ -37,7 +37,7 @@ export const play: Command = {
 		}
 
 		if (!url) {
-			await interaction.reply("Ik kan de track niet vinden :(")
+			await interaction.followUp("Ik kan de track niet vinden :(")
 			return;
 		}
 
@@ -92,7 +92,7 @@ export const play: Command = {
 			}
 		} catch (error) {
 			console.warn(error);
-			await interaction.reply('Ik kon de track niet afspelen... probeer het later nog eens!!');
+			await interaction.followUp('Ik kon de track niet afspelen... probeer het later nog eens!!');
 		}
 	},
 };

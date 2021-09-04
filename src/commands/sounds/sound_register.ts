@@ -1,6 +1,6 @@
 import { battieDb } from "../../process/mongodb";
 import { Command } from "../../models/Command";
-import { RANDOM_SOUND_NAME } from "./_sound-commands";
+import { DEFAULT_VOLUME, RANDOM_SOUND_NAME, VOLUME_CHOICES } from "./_sound-commands";
 
 const gdriveRegex = /https:\/\/(drive\.google\.com\/file\/d)(.*)(\/view\?usp=sharing)/gm
 
@@ -26,12 +26,21 @@ export const soundRegister: Command = {
             type: 'BOOLEAN' as const,
             description: 'Geeft aan of dit een google drive share-url is',
             required: false,
-        }]
+        },
+        {
+            choices: VOLUME_CHOICES,
+            name: 'volume',
+            type: 'NUMBER' as const,
+            description: 'Geeft het volume aan van de track',
+            required: false,
+        },
+    ]
     },
     async execute(interaction, guild, user) {
         const name = interaction.options.get('name')!.value! as string;
         let url = interaction.options.get('url')!.value! as string;
         const gdrive = interaction.options.getBoolean("gdrive")
+        const volume = interaction.options.getNumber("volume")
 
         if (name === RANDOM_SOUND_NAME) {
             await interaction.reply(`Je sound kan niet de naam *${RANDOM_SOUND_NAME}* hebben`)
@@ -61,6 +70,7 @@ export const soundRegister: Command = {
                 name: name,
                 guildId: guild.id,
                 url: url,
+                volume: volume ? volume : DEFAULT_VOLUME,
                 registeredBy: user.username,
                 registeredAt: Date.now(),
                 lastModifiedAt: null,

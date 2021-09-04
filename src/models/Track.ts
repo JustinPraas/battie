@@ -55,20 +55,26 @@ export class Track implements TrackData {
 				},
 				{ stdio: ['ignore', 'pipe', 'ignore'] },
 			);
+
 			if (!process.stdout) {
 				reject(new Error('No stdout'));
 				return;
 			}
+
 			const stream = process.stdout;
 			const onError = (error: Error) => {
 				if (!process.killed) process.kill();
 				stream.resume();
 				reject(error);
 			};
+			
 			process
 				.once('spawn', () => {
 					demuxProbe(stream)
-						.then((probe) => resolve(createAudioResource(probe.stream, { metadata: this, inputType: probe.type })))
+						.then((probe) => {
+							const audioResource = createAudioResource(probe.stream, { metadata: this, inputType: probe.type, inlineVolume: true })
+							return resolve(audioResource)
+						})
 						.catch(onError);
 				})
 				.catch(onError);

@@ -31,7 +31,7 @@ export const reminders: Command = {
                             activeRemindersMap.get(removeId.value!.toString());
                         if (foundReminderJob != undefined) {
                             foundReminderJob.cancel();
-                            await interaction.reply("Je reminder is verwijdert");
+                            await interaction.reply("Je reminder is verwijderd");
                             return
                         } else {
                             await interaction.reply(
@@ -41,7 +41,7 @@ export const reminders: Command = {
                         }
                     } else {
                         await interaction.reply(
-                            "Je reminder kon niet verwijdert worden"
+                            "Je reminder kon niet verwijderd worden"
                         );
                         return
                     }

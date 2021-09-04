@@ -7,7 +7,7 @@ export const soundDelete: Command = {
     command:
     {
         name: 'delete-sound',
-        description: 'Verwijdert een sound',
+        description: 'Verwijderd een sound',
         options: [{
             name: 'name',
             type: 'STRING' as const,
@@ -32,7 +32,7 @@ export const soundDelete: Command = {
             const acknowledged = (await collection.deleteOne({ name: name, guildId: guild.id })).acknowledged
 
             if (acknowledged) {
-                await interaction.reply(`De sound *${name}* is verwijdert!`)
+                await interaction.reply(`De sound *${name}* is verwijderd!`)
                 return
             } else {
                 await interaction.reply("De sound kon om een onbekende reden niet geupload worden... :(")

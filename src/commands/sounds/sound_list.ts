@@ -20,7 +20,7 @@ export const soundList: Command = {
             } else {
                 let stringBuilder = "Dit zijn de geregistreerde sounds:"
                 sounds.forEach(sound => {
-                    stringBuilder += "\n*" + sound.name + "*"
+                    stringBuilder += "\n*" + sound.name + "* " + sound.volume
                 })
                 .then(async () => {
                     await interaction.reply(stringBuilder);
