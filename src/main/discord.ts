@@ -1,5 +1,5 @@
 import { isProduction, log } from "./main";
-import Discord, { CommandInteraction, Intents, Interaction } from "discord.js";
+import Discord, { CommandInteraction, Intents, Interaction, User } from "discord.js";
 import { currentActivity, startSchedulingNewActivites } from "../modules/misc/activity_changer";
 import { startSchedulingHydrationReminders } from "../modules/misc/hydration";
 import { instantiateSchedulesFromDatabase } from "../modules/reminders/remind_me";
@@ -72,12 +72,24 @@ const commands = new Discord.Collection<string, Command>();
 // Fill the commands collection
 commandList.forEach((command) => commands.set(command.command.name, command));
 
-function handleCommand(interaction: CommandInteraction) {
+async function handleCommand(interaction: CommandInteraction) {
     // Get the desired client command
     const clientCommand = commands.get(interaction.command?.name!);
 
+    const guild = interaction.guild
+    if (!guild) {
+        await interaction.reply("Deze command kan je alleen uitvoeren in een guild")
+        return
+    }
+
+    const user: User = interaction.member?.user as User;
+    if (!user) {
+        await interaction.reply("Je bent geen gewone user :(")
+        return
+    }
+
     // If command exists, execute it
-    if (clientCommand) clientCommand.execute(interaction);
+    if (clientCommand) clientCommand.execute(interaction, guild, user);
     // Otherwise return
     else return;
 }

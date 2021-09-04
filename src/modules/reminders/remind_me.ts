@@ -48,7 +48,7 @@ export const remindMe: Command = {
             },
         ],
     },
-    async execute(interaction) {
+    async execute(interaction, _, user) {
         const atOrOn = interaction.options.get('type')!.value! as string;
 
         if (atOrOn != "in" && atOrOn != "on") {
@@ -56,9 +56,6 @@ export const remindMe: Command = {
                 `Ik snap je command format niet.`
             );
         }
-
-        // Dissect command parts
-        const user: User = interaction.member!.user as User;
 
         const dateAndTimePart = interaction.options.get('timeindication')!.value! as string;
         const content = interaction.options.get('content')!.value! as string;

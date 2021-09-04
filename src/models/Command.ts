@@ -1,6 +1,6 @@
-import { ApplicationCommandData, CommandInteraction } from "discord.js";
+import { ApplicationCommandData, CommandInteraction, Guild, User } from "discord.js";
 
 export interface Command {
     command: ApplicationCommandData,
-    execute: (interaction: CommandInteraction) => void;
+    execute: (interaction: CommandInteraction, guild: Guild, user: User) => void;
 }

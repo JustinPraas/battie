@@ -1,4 +1,3 @@
-import { log } from "../../main/main";
 import { battieDb } from "../../main/mongodb";
 import { Command } from "../../models/Command";
 
@@ -8,15 +7,7 @@ export const listSounds: Command = {
         name: 'list-sounds',
         description: 'Laat alle geregistreerde sounds zien',
     },
-    async execute(interaction) {
-        const guild = interaction.guild;
-
-        if (!guild) {
-            await interaction.reply(
-                "Dit kan je alleen in een server uitvoeren"
-            );
-            return
-        }
+    async execute(interaction, guild, _) {
 
         if (battieDb) {
             const collection = battieDb.collection("soundregistrations");

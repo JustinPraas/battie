@@ -20,16 +20,7 @@ export const soundboard: Command = {
             required: true,
         }]
     },
-    async execute(interaction) {
-        const guild = interaction.guild;
-
-        if (!guild) {
-            await interaction.reply(
-                "Dit kan je alleen in een server uitvoeren"
-            );
-            return
-        }
-
+    async execute(interaction, guild, _) {
         let subscription = guildMusicSubscriptionMap.get(guild.id)
         if (subscription && (subscription.queue.length > 0 || subscription.audioPlayer.state.status != AudioPlayerStatus.Idle)) {
             await interaction.reply("Ik kan helaas geen geluiden afspelen terwijl er tracks worden afgespeeld :(")

@@ -9,16 +9,7 @@ export const queue: Command = {
         name: 'queue',
         description: 'Toont de huidige wachtrij van tracks',
     },
-    async execute(interaction) {
-        const guild = interaction.guild;
-
-        if (!guild) {
-            await interaction.reply(
-                "Dit kan je alleen in een server uitvoeren"
-            );
-            return
-        }
-
+    async execute(interaction, guild, _) {
         const subscription = guildMusicSubscriptionMap.get(
             guild.id
         );

@@ -21,11 +21,8 @@ export const reminders: Command = {
             },
         ],
     },
-    async execute(interaction) {
-        const user: User = interaction.member!.user as User;
-
+    async execute(interaction, _, user) {
         const removeId = interaction.options.get('remove')
-
         if (battieDb) {
             const collection = battieDb.collection("reminders");
             if (removeId && removeId.value) {

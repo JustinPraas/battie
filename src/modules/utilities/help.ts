@@ -1,7 +1,5 @@
-import { commandList, COMMAND_PREFIX } from "../../main/discord";
+import { commandList } from "../../main/discord";
 import { Command } from "../../models/Command";
-
-const COMMAND = "help"
 
 export const help: Command = {
     command: {
@@ -16,7 +14,7 @@ export const help: Command = {
             },
         ],
     },
-    async execute(interaction) {
+    async execute(interaction, _1, _2) {
 
         let commandName: string | undefined = undefined
         if (interaction.options.get('command'))

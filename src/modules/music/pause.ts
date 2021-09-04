@@ -7,14 +7,7 @@ export const pause: Command = {
         name: 'pause',
         description: 'Pauzeert de huidige track',
     },
-    async execute(interaction) {
-        const guild = interaction.guild;
-
-        if (!guild) {
-            await interaction.reply("Dit kan je alleen in een server uitvoeren")
-            return
-        }
-
+    async execute(interaction, guild, _) {
         const subscription = guildMusicSubscriptionMap.get(guild.id);
         if (subscription) {
             subscription.audioPlayer.pause();

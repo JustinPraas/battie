@@ -7,14 +7,7 @@ export const resume: Command = {
         name: 'resume',
         description: 'Hervat de huidige track',
     },
-    async execute(interaction) {
-        const guild = interaction.guild;
-
-        if (!guild) {
-            await interaction.reply("Dit kan je alleen in een server uitvoeren")
-            return
-        }
-
+    async execute(interaction, guild, _) {
         const subscription = guildMusicSubscriptionMap.get(guild.id);
         if (!subscription) {
             await interaction.reply("Ik kan geen tracks resumen ALS ER GEEN TRACKS IN DE QUEUE STAAN :@")

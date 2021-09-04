@@ -8,23 +8,16 @@ export const skip: Command = {
         name: 'skip',
         description: 'Skipt de huidige track',
     },
-    async execute(interaction) {
-        const guild = interaction.guild;
-
-        if (!guild) {
-            await interaction.reply("Dit kan je alleen in een server uitvoeren")
-            return;
-        }
-
+    async execute(interaction, guild, _) {
         // Get server queue
-        const musicSubscription = guildMusicSubscriptionMap.get(guild?.id);
-        if (!musicSubscription) {
+        const subscription = guildMusicSubscriptionMap.get(guild?.id);
+        if (!subscription) {
             await interaction.reply("Er staan geen tracks in de wachtrij o.i.d.")
             return
         }
 
         // Skip the song
-        skipSong(interaction, musicSubscription);
+        skipSong(interaction, subscription);
     },
 };
 

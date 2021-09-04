@@ -107,7 +107,7 @@ export const setActivity: Command = {
             },
         ],
     },
-    async execute(interaction) {
+    async execute(interaction, _1, _2) {
 
         const type = interaction.options.get('type')!.value! as string;
         const activity = interaction.options.get('activity')!.value! as string;
@@ -147,9 +147,7 @@ export const randomActivity = () => {
 };
 
 export function startSchedulingNewActivites(client: Client) {
-    const rule = new RecurrenceRule();
-    rule.hour = [0, 4, 8, 12, 16, 20];
-    activityChangerJob = scheduleJob(rule, function () {
+    activityChangerJob = scheduleJob("0 0 */1 * * *", function () {
         const newRandomActivity = randomActivity();
         client.user?.setActivity(
             newRandomActivity.activity,

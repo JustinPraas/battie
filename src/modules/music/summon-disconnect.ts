@@ -11,16 +11,7 @@ export const disconnect: Command = {
         name: 'leave',
         description: 'De bot verlaat zijn voice channel',
     },
-    async execute(interaction) {
-        const guild = interaction.guild;
-
-        if (!guild) {
-            await interaction.reply(
-                "Dit kan je alleen in een server uitvoeren"
-            );
-            return
-        }
-
+    async execute(interaction, guild, _) {
         const subscription = guildMusicSubscriptionMap.get(guild.id);
 
         if (subscription) {
@@ -39,17 +30,7 @@ export const summon: Command = {
         name: 'summon',
         description: 'Roept mij op in jouw voice channel',
     },
-    async execute(interaction) {
-        const guild = interaction.guild;
-        const user: User = (interaction.member as GuildMember).user;
-
-        if (!guild) {
-            await interaction.reply(
-                "Dit kan je alleen in een server uitvoeren"
-            );
-            return
-        }
-
+    async execute(interaction, guild, user) {
         const guildMember = guild.members.cache.get(user.id);
         if (!guildMember) {
             await interaction.reply(

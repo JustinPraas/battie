@@ -20,14 +20,8 @@ export const play: Command = {
 			},
 		],
 	},
-	async execute(interaction) {
+	async execute(interaction, guild, _) {
 		await interaction.deferReply()
-
-		const guild = interaction.guild;
-		if (!guild) {
-			await interaction.reply("Je moet deze command gebruiken in een server");
-			return
-		}
 
 		let subscription = guildMusicSubscriptionMap.get(guild.id);
 

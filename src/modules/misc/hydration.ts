@@ -33,10 +33,9 @@ export const hydration: Command = {
             },
         ],
     },
-    async execute(interaction) {
+    async execute(interaction, _1, user) {
 
         const toggle = interaction.options.get('toggle')!.value! as string;
-        const user: User = interaction.member!.user as User;
 
         if (toggle == "on") {
             await addSubscriber(user, interaction);

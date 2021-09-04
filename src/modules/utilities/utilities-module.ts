@@ -1,6 +1,5 @@
 import { help } from "./help";
-// import { poll } from "./poll";
-// import { roll } from "./roll";
-// import { userRoulette } from "./user_roulette";
+import { poll } from "./poll";
+import { roll } from "./roll";
 
-export const utilityCommands = [ help ]
+export const utilityCommands = [ help, poll, roll ]

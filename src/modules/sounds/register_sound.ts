@@ -19,15 +19,7 @@ export const registerSound: Command = {
             required: true,
         }]
     },
-    async execute(interaction) {
-        const guild = interaction.guild;
-
-        if (!guild) {
-            await interaction.reply(
-                "Dit kan je alleen in een server uitvoeren"
-            );
-            return
-        }
+    async execute(interaction, guild, user) {
 
 		const name = interaction.options.get('name')!.value! as string;
 		const url = interaction.options.get('url')!.value! as string;
@@ -41,7 +33,7 @@ export const registerSound: Command = {
                 return
             }
 
-            const acknowledged = (await collection.insertOne({name: name, guildId: guild.id, url: url})).acknowledged
+            const acknowledged = (await collection.insertOne({name: name, guildId: guild.id, url: url, registeredBy: user.username, registeredOn: Date.now()})).acknowledged
             if (acknowledged) {
                 await interaction.reply("De sound is geupload!")
                 return

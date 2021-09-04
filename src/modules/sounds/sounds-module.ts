@@ -1,4 +1,4 @@
-import { listSounds } from "./get_sounds";
+import { listSounds } from "./list_sounds";
 import { registerSound } from "./register_sound";
 import { soundboard } from "./soundboard";
 
