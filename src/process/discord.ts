@@ -7,7 +7,7 @@ import { Command } from "../models/Command";
 import { miscCommands } from "../commands/misc/_scheduling-commands";
 import { musicCommands } from "../commands/music/_music-commands";
 import { utilityCommands } from "../commands/utilities/utilities-module";
-import { getMongoClient, mongoClient } from "./mongodb";
+import { getMongoClient } from "./mongodb";
 import { soundsCommands } from "../commands/sounds/_sound-commands";
 import { reminderCommands } from "../commands/reminders/_reminder-commands";
 
