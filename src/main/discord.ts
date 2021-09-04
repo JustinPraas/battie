@@ -13,7 +13,6 @@ import { soundsCommands } from "../modules/sounds/sounds-module";
 
 const guildIds = ["658627142908903427"]
 
-export const DISCORD_TOKEN = isProduction ? process.env.DISCORD_KEY : process.env.DISCORD_KEY_BETA;
 export const discordClient = new Discord.Client({
     intents: [
         Intents.FLAGS.GUILDS,
@@ -24,6 +23,7 @@ export const discordClient = new Discord.Client({
 });
 
 export function loginDiscord() {
+    const DISCORD_TOKEN = isProduction ? process.env.DISCORD_KEY : process.env.DISCORD_KEY_BETA;
     discordClient.login(DISCORD_TOKEN);
 }
 
