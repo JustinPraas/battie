@@ -1,7 +1,7 @@
-import { battieDb } from "../../main/mongodb";
+import { battieDb } from "../../process/mongodb";
 import { Command } from "../../models/Command";
 
-export const listSounds: Command = {         
+export const soundList: Command = {         
     command:
     {
         name: 'list-sounds',

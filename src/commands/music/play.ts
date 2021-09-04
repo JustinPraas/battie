@@ -1,11 +1,11 @@
 import { AudioPlayerStatus, entersState, joinVoiceChannel, VoiceConnectionStatus } from "@discordjs/voice";
 import { GuildMember } from "discord.js";
 import yts, { SearchResult } from "yt-search";
-import { log } from "../../main/main";
+import { log } from "../../process/main";
 import { Command } from "../../models/Command";
 import { MusicSubscription } from "../../models/MusicSubscription";
 import { Track } from "../../models/Track";
-import { guildMusicSubscriptionMap } from "./music-module";
+import { guildMusicSubscriptionMap } from "./_music-commands";
 
 export const play: Command = {
 	command: {

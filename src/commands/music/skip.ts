@@ -1,7 +1,7 @@
 import { CommandInteraction, GuildMember } from "discord.js";
 import { Command } from "../../models/Command";
 import { MusicSubscription } from "../../models/MusicSubscription";
-import { guildMusicSubscriptionMap } from "./music-module";
+import { guildMusicSubscriptionMap } from "./_music-commands";
 
 export const skip: Command = {
     command: {

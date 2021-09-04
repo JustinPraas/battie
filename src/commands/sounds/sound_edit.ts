@@ -1,9 +1,9 @@
-import { battieDb } from "../../main/mongodb";
+import { battieDb } from "../../process/mongodb";
 import { Command } from "../../models/Command";
 
 const gdriveRegex = /https:\/\/(drive\.google\.com\/file\/d)(.*)(\/view\?usp=sharing)/gm
 
-export const editSound: Command = {
+export const soundEdit: Command = {
     command:
     {
         name: 'edit-sound',

@@ -1,4 +1,4 @@
-import { commandList } from "../../main/discord";
+import { commandList } from "../../process/discord";
 import { Command } from "../../models/Command";
 
 export const help: Command = {

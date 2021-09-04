@@ -1,10 +1,10 @@
-import { log } from "../../main/main";
-import { battieDb } from "../../main/mongodb";
+import { battieDb } from "../../process/mongodb";
 import { Command } from "../../models/Command";
+import { RANDOM_SOUND_NAME } from "./_sound-commands";
 
 const gdriveRegex = /https:\/\/(drive\.google\.com\/file\/d)(.*)(\/view\?usp=sharing)/gm
 
-export const registerSound: Command = {
+export const soundRegister: Command = {
     command:
     {
         name: 'register-sound',
@@ -29,10 +29,14 @@ export const registerSound: Command = {
         }]
     },
     async execute(interaction, guild, user) {
-
         const name = interaction.options.get('name')!.value! as string;
         let url = interaction.options.get('url')!.value! as string;
         const gdrive = interaction.options.getBoolean("gdrive")
+
+        if (name === RANDOM_SOUND_NAME) {
+            await interaction.reply(`Je sound kan niet de naam *${RANDOM_SOUND_NAME}* hebben`)
+            return
+        }
 
         if (battieDb) {
             const collection = battieDb.collection("soundregistrations");

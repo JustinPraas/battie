@@ -1,17 +1,18 @@
 import { AudioPlayerStatus, createAudioPlayer, createAudioResource, entersState, joinVoiceChannel, StreamType, VoiceConnectionStatus } from "@discordjs/voice";
 import { GuildMember, VoiceChannel } from "discord.js";
-import { log } from "../../main/main";
-import { battieDb } from "../../main/mongodb";
+import { battieDb } from "../../process/mongodb";
 import { Command } from "../../models/Command";
-import { guildMusicSubscriptionMap } from "../music/music-module";
+import { guildMusicSubscriptionMap } from "../music/_music-commands";
 import { createDiscordJSAdapter } from "./adapter";
+import { RANDOM_SOUND_NAME } from "./_sound-commands";
+import { shuffle } from "../../util/utils";
 
 const player = createAudioPlayer();
 
-export const soundboard: Command = {
+export const soundPlay: Command = {
     command:
     {
-        name: 'soundboard',
+        name: 'play-sound',
         description: 'Speelt een sound af van de soundboard',
         options: [{
             name: 'name',
@@ -28,9 +29,15 @@ export const soundboard: Command = {
         }
 
         if (battieDb) {
-            const nameArg = interaction.options.get('name')!.value! as string;
             const collection = battieDb.collection("soundregistrations");
-            const soundDocument = await collection.findOne({ name: nameArg, guildId: guild.id })
+
+            const nameArg = interaction.options.get('name')!.value! as string;
+            let soundDocument = null;
+            if (nameArg && nameArg == RANDOM_SOUND_NAME) {
+                soundDocument = shuffle(await collection.find().toArray())[0]
+            } else {
+                soundDocument = await collection.findOne({ name: nameArg, guildId: guild.id })
+            }
 
             if (!soundDocument) {
                 await interaction.reply("Er bestaat geen sound registratie met deze naam :(")

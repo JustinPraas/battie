@@ -1,9 +1,9 @@
 import { joinVoiceChannel } from "@discordjs/voice";
 import { GuildMember, User } from "discord.js";
-import { log } from "../../main/main";
+import { log } from "../../process/main";
 import { Command } from "../../models/Command";
 import { MusicSubscription } from "../../models/MusicSubscription";
-import { guildMusicSubscriptionMap } from "./music-module";
+import { guildMusicSubscriptionMap } from "./_music-commands";
 
 export const disconnect: Command = {
     command: 

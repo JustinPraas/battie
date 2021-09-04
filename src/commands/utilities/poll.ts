@@ -1,5 +1,5 @@
 import { TextBasedChannels } from "discord.js";
-import { log } from "../../main/main";
+import { log } from "../../process/main";
 import { Command } from "../../models/Command";
 
 const emojis = ["🇦", "🇧", "🇨", "🇩", "🇪", "🇫", "🇬", "🇭", "🇮", "🇯", "🇰", "🇱", "🇲", "🇳", "🇴", "🇵", "🇶", "🇷", "🇸", "🇹"]

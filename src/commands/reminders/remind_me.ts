@@ -1,12 +1,12 @@
-import { DMChannel, Message, NewsChannel, TextBasedChannels, TextChannel, User } from "discord.js";
+import { DMChannel, NewsChannel, TextBasedChannels, TextChannel, User } from "discord.js";
 import { InsertOneResult } from "mongodb";
 import { Job, RecurrenceRule, scheduleJob } from "node-schedule";
-import { discordClient } from "../../main/discord";
-import { log } from "../../main/main";
-import { battieDb } from "../../main/mongodb";
+import { discordClient } from "../../process/discord";
+import { log } from "../../process/main";
+import { battieDb } from "../../process/mongodb";
 import { Command } from "../../models/Command";
 import { sleep } from "../../util/utils";
-import { RemindMeDocument } from "./reminders-module";
+import { RemindMeDocument } from "./_reminder-commands";
 
 const COMMAND = "remindme";
 

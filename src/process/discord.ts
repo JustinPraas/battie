@@ -1,15 +1,15 @@
 import { isProduction, log } from "./main";
 import Discord, { CommandInteraction, Intents, Interaction, User } from "discord.js";
-import { currentActivity, startSchedulingNewActivites } from "../modules/misc/activity_changer";
-import { startSchedulingHydrationReminders } from "../modules/misc/hydration";
-import { instantiateSchedulesFromDatabase } from "../modules/reminders/remind_me";
+import { currentActivity, startSchedulingNewActivites } from "../commands/misc/activity_changer";
+import { startSchedulingHydrationReminders } from "../commands/misc/hydration";
+import { instantiateSchedulesFromDatabase } from "../commands/reminders/remind_me";
 import { Command } from "../models/Command";
-import { miscCommands } from "../modules/misc/scheduling-module";
-import { musicCommands } from "../modules/music/music-module";
-import { reminderCommands } from "../modules/reminders/reminders-module";
-import { utilityCommands } from "../modules/utilities/utilities-module";
+import { miscCommands } from "../commands/misc/_scheduling-commands";
+import { musicCommands } from "../commands/music/_music-commands";
+import { utilityCommands } from "../commands/utilities/utilities-module";
 import { getMongoClient, mongoClient } from "./mongodb";
-import { soundsCommands } from "../modules/sounds/sounds-module";
+import { soundsCommands } from "../commands/sounds/_sound-commands";
+import { reminderCommands } from "../commands/reminders/_reminder-commands";
 
 const guildIds = ["658627142908903427"]
 
@@ -38,7 +38,7 @@ discordClient.once("ready", async () => {
 
     guildIds.forEach(async guildId => {
         const guild = await discordClient.guilds.fetch(guildId)
-        guild.commands.set(commandList.map(c => c.command));
+        guild.commands.set(commandList.map(c => c.command)).then(() => log.info("Deployed commands"))
     })
 });
 

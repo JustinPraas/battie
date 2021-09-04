@@ -1,5 +1,5 @@
 import { Command } from "../../models/Command";
-import { guildMusicSubscriptionMap } from "./music-module";
+import { guildMusicSubscriptionMap } from "./_music-commands";
 
 export const nowPlaying: Command = {    
     command:

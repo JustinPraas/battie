@@ -1,7 +1,7 @@
 import { ActivityOptions, Client } from "discord.js";
-import { Job, RecurrenceRule, scheduleJob } from "node-schedule";
-import { discordClient } from "../../main/discord";
-import { log } from "../../main/main";
+import { Job, scheduleJob } from "node-schedule";
+import { discordClient } from "../../process/discord";
+import { log } from "../../process/main";
 import { Command } from "../../models/Command";
 
 let activityChangerJob: Job | undefined = undefined;

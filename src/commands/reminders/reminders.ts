@@ -1,11 +1,10 @@
-import { User } from "discord.js";
 import { FindCursor } from "mongodb";
 import { Job } from "node-schedule";
-import { battieDb } from "../../main/mongodb";
+import { battieDb } from "../../process/mongodb";
 import { Command } from "../../models/Command";
 import { getFriendlyDate } from "../../util/utils";
-import { RemindMeDocument } from "./reminders-module";
 import { activeRemindersMap } from "./remind_me";
+import { RemindMeDocument } from "./_reminder-commands";
 
 export const reminders: Command = {
     command:

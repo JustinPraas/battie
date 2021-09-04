@@ -1,7 +1,7 @@
 import { AudioPlayerStatus, AudioResource } from "@discordjs/voice";
 import { Command } from "../../models/Command";
 import { Track } from "../../models/Track";
-import { guildMusicSubscriptionMap } from "./music-module";
+import { guildMusicSubscriptionMap } from "./_music-commands";
 
 export const queue: Command = {
     command: 

@@ -1,8 +1,8 @@
 import { Client, CommandInteraction, User } from "discord.js";
 import { Db, Document, FindCursor } from "mongodb";
 import { RecurrenceRule, scheduleJob } from "node-schedule";
-import { log } from "../../main/main";
-import { battieDb } from "../../main/mongodb";
+import { log } from "../../process/main";
+import { battieDb } from "../../process/mongodb";
 import { Command } from "../../models/Command";
 
 interface HydrationSubscriberDocument {
