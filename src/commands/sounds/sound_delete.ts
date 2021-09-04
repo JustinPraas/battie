@@ -1,8 +1,6 @@
 import { battieDb } from "../../process/mongodb";
 import { Command } from "../../models/Command";
 
-const gdriveRegex = /https:\/\/(drive\.google\.com\/file\/d)(.*)(\/view\?usp=sharing)/gm
-
 export const soundDelete: Command = {
     command:
     {

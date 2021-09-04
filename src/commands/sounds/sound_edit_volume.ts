@@ -42,7 +42,7 @@ export const soundEditVolume: Command = {
                     guildId: document.guildId,
                     url: document.url,
                     registeredBy: document.registeredBy,
-                    registeredAt: document.registered,
+                    registeredAt: document.registeredAt,
                     volume: volume ? volume : document.volume,
                     lastModifiedAt: Date.now(),
                     lastModifiedBy: user.username

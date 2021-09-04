@@ -1,0 +1,1 @@
+export const BOT_MAIN_COLOR = "#88c800"
