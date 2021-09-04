@@ -4,7 +4,7 @@ import { currentActivity, startSchedulingNewActivites } from "../commands/misc/a
 import { startSchedulingHydrationReminders } from "../commands/misc/hydration";
 import { instantiateSchedulesFromDatabase } from "../commands/reminders/remind_me";
 import { Command } from "../models/Command";
-import { miscCommands } from "../commands/misc/_scheduling-commands";
+import { miscCommands } from "../commands/misc/_misc-commands";
 import { musicCommands } from "../commands/music/_music-commands";
 import { utilityCommands } from "../commands/utilities/utilities-module";
 import { getMongoClient } from "./mongodb";

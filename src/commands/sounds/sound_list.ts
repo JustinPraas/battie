@@ -29,7 +29,7 @@ export const soundList: Command = {
     },
 };
 
-const THREE_DAY_MS = 2 * 60 * 60 * 1000
+const THREE_DAY_MS = 3 * 24 * 60 * 60 * 1000
 const getEmbed = (sounds: Document[]): MessageEmbed => {
     const cols: Document[][] = new Array(3)
     cols[0] = []
