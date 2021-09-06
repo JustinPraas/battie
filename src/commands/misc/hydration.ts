@@ -18,128 +18,97 @@ export const hydration: Command = {
             {
                 choices: [
                     {
-                        name: "on",
-                        value: "on",
+                        name: "4 hours",
+                        value: 240,
                     },
                     {
-                        name: "off",
-                        value: "off",
+                        name: "3 hours",
+                        value: 180,
+                    },
+                    {
+                        name: "2.5 hours",
+                        value: 150,
+                    },
+                    {
+                        name: "2 hours",
+                        value: 120,
+                    },
+                    {
+                        name: "1.5 hour",
+                        value: 90,
+                    },
+                    {
+                        name: "1 hour",
+                        value: 60,
+                    },
+                    {
+                        name: "45 minutes",
+                        value: 45,
+                    },
+                    {
+                        name: "30 minutes",
+                        value: 30,
+                    },
+                    {
+                        name: "Ik wil niet geremind worden",
+                        value: 0,
                     }
                 ],
-                name: 'toggle',
-                type: 'STRING' as const,
-                description: 'Wil je je aan of afmelden voor de reminder?',
+                name: 'minutes',
+                type: 'INTEGER' as const,
+                description: 'Om de hoeveel minuten wil je geremind worden?',
                 required: true,
             },
         ],
     },
     async execute(interaction, _1, user) {
+        await interaction.deferReply()
+        const minutes = interaction.options.getInteger("minutes")!
+        const success = await updateSubscriber(user, minutes)
 
-        const toggle = interaction.options.get('toggle')!.value! as string;
-
-        if (toggle == "on") {
-            await addSubscriber(user, interaction);
-        } else if (toggle == "off") {
-            await removeSubscriber(user, interaction);
+        if (success) {
+            await interaction.followUp("Je reminder staat gescheduled voor de aangegeven tijdsinterval")
+            return
         } else {
-            await interaction.reply("Wat wil je dat ik doe?");
+            await interaction.followUp("Er ging iets fout bij het subscriben op de hydration reminder.. probeer het later nog eens")
+            return
         }
     },
 };
 
-function removeSubscriber(user: User, interaction: CommandInteraction) {
+const updateSubscriber = async (user: User, minutes: number): Promise<boolean> => {
     if (battieDb) {
-        isUserSubscribed(user, battieDb).then(async (value) => {
-            if (value == null) {
-                await interaction.reply(
-                    "Je was niet eens gesubscribed op de hydration reminder!"
-                );
-                return;
-            } else {
-                const collection = battieDb!.collection("hydration");
-                const newSub: HydrationSubscriberDocument = {
-                    discordId: user.id,
-                };
-
-                collection
-                    .deleteOne(newSub)
-                    .then(async () => {
-                        await interaction.reply(
-                            "Je bent nu niet meer gesubscribed op de hydration reminder!"
-                        );
-                    })
-                    .catch(async (err) => {
-                        await interaction.reply(
-                            "Er ging iets fout tijdens het unsubscriben op de hydration reminder... sorry"
-                        );
-                        log.error(
-                            "Something went wrong while unsubscribing to the hydration reminder:",
-                            err
-                        );
-                    });
-            }
-        });
+        const collection = battieDb.collection("hydration")
+        const ack = collection.updateOne({userId: user.id}, {$set: {userId: user.id, minutes: minutes}}, {upsert: true})
+        const acknowledged = (await ack).acknowledged
+        return acknowledged
+    } else {
+        return false
     }
 }
-
-function addSubscriber(user: User, interaction: CommandInteraction) {
-    if (battieDb) {
-        isUserSubscribed(user, battieDb).then(async (value) => {
-            if (value != null) {
-                await interaction.reply(
-                    "Je bent al gesubscribed op de hydration reminder!"
-                );
-            } else {
-                const collection = battieDb!.collection("hydration");
-                const newSub: HydrationSubscriberDocument = {
-                    discordId: user.id,
-                };
-
-                collection
-                    .insertOne(newSub)
-                    .then(async () => {
-                        await interaction.reply(
-                            "Je bent nu gesubscribed op de hydration reminder!"
-                        );
-                    })
-                    .catch(async (err) => {
-                        await interaction.reply(
-                            "Er ging iets fout tijdens het subscriben op de hydration reminder... sorry"
-                        );
-                        log.error(
-                            "Something went wrong while subscribing to the hydration reminder:",
-                            err
-                        );
-                    });
-            }
-        });
-    }
-}
-
-const isUserSubscribed = (
-    user: User,
-    battieDb: Db
-): Promise<Document | null> => {
-    const collection = battieDb.collection("hydration");
-    if (collection) {
-        return collection.findOne({ discordId: user.id });
-    }
-    return Promise.resolve(null);
-};
 
 export function startSchedulingHydrationReminders(client: Client) {
     const rule = new RecurrenceRule();
-    rule.minute = 0;
+    rule.minute = [0, 15, 30, 45];
     scheduleJob(rule, () => remindHydrationSubscribers(client));
 }
 
-function remindHydrationSubscribers(client: Client) {
-    if (battieDb) {
-        const subs: FindCursor<Document> = battieDb.collection("hydration").find();
-        log.info(`Reminding all subscribers to hydrate`);
-        subs.forEach((sub: Document) => {
-            const discordId = sub.discordId;
-            client.users.cache.get(discordId)?.send("Hydration Reminder: drink ongeveer 200-300ml water!")
+async function remindHydrationSubscribers(client: Client) {
+    const currentHour = new Date(Date.now()).getUTCHours() + 2 
+    const isMidnight = currentHour > 0 && currentHour < 7
+    if (battieDb && !isMidnight) {
+        const currentTime = new Date(Date.now())
+        const currentMinuteOfDay = (currentTime.getUTCHours() + 2) * 60 + currentTime.getMinutes()
+
+
+        // Get all subscribers for this timeslot
+        const subs = await (await battieDb.collection("hydration").find().toArray()).filter(sub => currentMinuteOfDay % sub.minutes == 0)
+        
+        log.info(`Reminding ${subs} to hydrate`)
+        subs.forEach((document: Document) => {
+            const userId = document.userId;
+            client.users.cache.get(userId)?.send("Reminder: vergeet niet te hydrateren 🥤")
         });
     }
 }
+
