@@ -1,5 +1,8 @@
+import { DiscordAPIError } from "discord.js";
 import { Command } from "../../models/Command";
+import { log } from "../../process/main";
 
+const PURGE_LIMIT = 10;
 export const purge: Command = {
     command:
     {
@@ -18,7 +21,7 @@ export const purge: Command = {
 
         const quantity = interaction.options.getInteger("quantity")
 
-        if (quantity! > 5) {
+        if (quantity! > PURGE_LIMIT) {
             await interaction.reply("Om veiligheidsredenen kan je maar maximaal 5 berichten per keer verwijderen... :)")
             return
         }
@@ -31,7 +34,13 @@ export const purge: Command = {
         await interaction.reply("On it...")
 
         messages.forEach(message => {
-            message.delete()
+            try {
+                message.delete()
+            } catch (e) {
+                if (e instanceof DiscordAPIError) {
+                    log.warn("Could not remove message:", e.message)
+                }
+            }
         })
     },
 };
