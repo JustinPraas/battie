@@ -11,7 +11,7 @@ import { getMongoClient } from "./mongodb";
 import { soundsCommands } from "../commands/sounds/_sound-commands";
 import { reminderCommands } from "../commands/reminders/_reminder-commands";
 
-const guildIds = ["658627142908903427"]
+const guildIds = ["658627142908903427", "830851081952034836"]
 
 export const discordClient = new Discord.Client({
     intents: [

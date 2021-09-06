@@ -22,7 +22,7 @@ export const purge: Command = {
         const quantity = interaction.options.getInteger("quantity")
 
         if (quantity! > PURGE_LIMIT) {
-            await interaction.reply("Om veiligheidsredenen kan je maar maximaal 5 berichten per keer verwijderen... :)")
+            await interaction.reply(`Om veiligheidsredenen kan je maar maximaal ${PURGE_LIMIT} berichten per keer verwijderen... :)`)
             return
         }
 
