@@ -95,7 +95,7 @@ export function startSchedulingHydrationReminders(client: Client) {
 
 async function remindHydrationSubscribers(client: Client) {
     const currentHour = new Date(Date.now()).getUTCHours() + 2 
-    const isMidnight = currentHour > 0 && currentHour < 7
+    const isMidnight = currentHour > 2 && currentHour < 7
     if (battieDb && !isMidnight) {
         const currentTime = new Date(Date.now())
         const currentMinuteOfDay = (currentTime.getUTCHours() + 2) * 60 + currentTime.getMinutes()
