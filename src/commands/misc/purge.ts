@@ -34,13 +34,7 @@ export const purge: Command = {
         await interaction.reply("On it...")
 
         messages.forEach(message => {
-            try {
-                message.delete()
-            } catch (e) {
-                if (e instanceof DiscordAPIError) {
-                    log.warn("Could not remove message:", e.message)
-                }
-            }
+            message.delete().catch((error) => log.warn("Could not remove message:", error.message))
         })
     },
 };
