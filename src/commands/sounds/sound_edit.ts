@@ -1,6 +1,6 @@
 import { battieDb } from "../../process/mongodb";
 import { Command } from "../../models/Command";
-import { VOLUME_CHOICES } from "./_sound-commands";
+import { isModerator } from "../../util/utils";
 
 const gdriveRegex = /https:\/\/(drive\.google\.com\/file\/d)(.*)(\/view\?usp=sharing)/gm
 
@@ -33,23 +33,14 @@ export const soundEdit: Command = {
             description: 'Geeft aan of dit een google drive share-url is',
             required: false,
         },
-        {
-            choices: VOLUME_CHOICES,
-            name: 'new-volume',
-            type: 'NUMBER' as const,
-            description: 'Geeft het aangepaste volume aan van de track',
-            required: false,
-        },
         ]
     },
-    modsOnly: true,
     async execute(interaction, guild, user) {
 
         const name = interaction.options.get('name')!.value! as string;
         const newName = interaction.options.get('new-name')?.value! as string;
         let newUrl = interaction.options.get('new-url')?.value! as string;
         const gdrive = interaction.options.getBoolean("gdrive")
-        const volume = interaction.options.getNumber("new-volume")
 
         if (battieDb) {
             const collection = battieDb.collection("soundregistrations");
@@ -58,6 +49,11 @@ export const soundEdit: Command = {
 
             if (!exists) {
                 await interaction.reply("Er bestaat geen sound met deze naam")
+                return
+            }        
+
+            if (!(isModerator(user) || document.userId == user.id)) {
+                await interaction.reply("Je hebt niet de juiste bevoegdheden om dit te kunnen doen...")
                 return
             }
 
@@ -85,7 +81,7 @@ export const soundEdit: Command = {
                     url: newUrl ? newUrl : document.url,
                     registeredBy: document.registeredBy,
                     registeredAt: document.registeredAt,
-                    volume: volume ? volume : document.volume,
+                    volume: document.volume,
                     lastModifiedAt: Date.now(),
                     lastModifiedBy: user.username
                 }

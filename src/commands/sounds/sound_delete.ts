@@ -14,8 +14,7 @@ export const soundDelete: Command = {
             required: true,
         }]
     },
-    modsOnly: true,
-    async execute(interaction, guild, _) {
+    async execute(interaction, guild, user) {
 
         const name = interaction.options.get('name')!.value! as string;
 
@@ -26,6 +25,11 @@ export const soundDelete: Command = {
 
             if (!exists) {
                 await interaction.reply("Er bestaat geen sound met deze naam...")
+                return
+            }
+
+            if (!(isModerator(user) || document.userId == user.id)) {
+                await interaction.reply("Je hebt niet de juiste bevoegdheden om dit te kunnen doen...")
                 return
             }
 

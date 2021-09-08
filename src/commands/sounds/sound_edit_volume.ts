@@ -1,6 +1,7 @@
 import { battieDb } from "../../process/mongodb";
 import { Command } from "../../models/Command";
 import { VOLUME_CHOICES } from "./_sound-commands";
+import { isModerator } from "../../util/utils";
 
 export const soundEditVolume: Command = {
     command:
@@ -22,7 +23,6 @@ export const soundEditVolume: Command = {
         },
         ]
     },
-    modsOnly: true,
     async execute(interaction, guild, user) {
         const name = interaction.options.get('name')!.value! as string;
         const volume = interaction.options.getNumber("new-volume")
@@ -34,6 +34,11 @@ export const soundEditVolume: Command = {
 
             if (!exists) {
                 await interaction.reply("Er bestaat geen sound met deze naam")
+                return
+            }            
+
+            if (!(isModerator(user) || document.userId == user.id)) {
+                await interaction.reply("Je hebt niet de juiste bevoegdheden om dit te kunnen doen...")
                 return
             }
 
