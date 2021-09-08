@@ -22,6 +22,7 @@ export const soundEditVolume: Command = {
         },
         ]
     },
+    modsOnly: true,
     async execute(interaction, guild, user) {
         const name = interaction.options.get('name')!.value! as string;
         const volume = interaction.options.getNumber("new-volume")

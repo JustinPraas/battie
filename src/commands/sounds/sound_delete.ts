@@ -1,5 +1,6 @@
 import { battieDb } from "../../process/mongodb";
 import { Command } from "../../models/Command";
+import { isModerator } from "../../util/utils";
 
 export const soundDelete: Command = {
     command:
@@ -13,6 +14,7 @@ export const soundDelete: Command = {
             required: true,
         }]
     },
+    modsOnly: true,
     async execute(interaction, guild, _) {
 
         const name = interaction.options.get('name')!.value! as string;

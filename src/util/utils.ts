@@ -1,4 +1,5 @@
-import { Message } from "discord.js";
+import { Message, User } from "discord.js";
+import { mods } from "../process/discord";
 
 export function shuffle(array: any[]) {
     var currentIndex = array.length,
@@ -79,4 +80,8 @@ export function getMinutesFromSeconds(seconds: number) {
 
 export function getSecondsFromSeconds(seconds: number) {
     return Math.floor(seconds % 60);
+}
+
+export const isModerator = (user: User): boolean => {
+    return mods.includes(user.id)
 }

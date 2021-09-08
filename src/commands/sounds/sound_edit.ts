@@ -42,6 +42,7 @@ export const soundEdit: Command = {
         },
         ]
     },
+    modsOnly: true,
     async execute(interaction, guild, user) {
 
         const name = interaction.options.get('name')!.value! as string;

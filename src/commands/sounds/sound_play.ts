@@ -90,7 +90,6 @@ function playSound(url: string, volume: number) {
         inlineVolume: true,
     });
 
-    resource.playbackDuration
     resource.volume?.setVolumeLogarithmic(volume)
 
     player.play(resource);

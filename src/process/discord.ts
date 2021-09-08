@@ -10,8 +10,11 @@ import { utilityCommands } from "../commands/utilities/utilities-module";
 import { getMongoClient } from "./mongodb";
 import { soundsCommands } from "../commands/sounds/_sound-commands";
 import { reminderCommands } from "../commands/reminders/_reminder-commands";
+import { isModerator } from "../util/utils";
 
 const guildIds = ["658627142908903427", "830851081952034836"]
+
+export const mods = ["236578243799416832"]
 
 export const discordClient = new Discord.Client({
     intents: [
@@ -85,6 +88,11 @@ async function handleCommand(interaction: CommandInteraction) {
     const user: User = interaction.member?.user as User;
     if (!user) {
         await interaction.reply("Je bent geen gewone user :(")
+        return
+    }    
+
+    if (clientCommand?.modsOnly && !isModerator(user)) {
+        await interaction.reply("Je hebt hier niet de juiste rechten voor...")
         return
     }
 

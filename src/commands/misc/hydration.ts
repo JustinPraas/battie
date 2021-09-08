@@ -1,13 +1,9 @@
-import { Client, CommandInteraction, User } from "discord.js";
-import { Db, Document, FindCursor } from "mongodb";
+import { Client, User } from "discord.js";
+import { Document } from "mongodb";
 import { RecurrenceRule, scheduleJob } from "node-schedule";
 import { log } from "../../process/main";
 import { battieDb } from "../../process/mongodb";
 import { Command } from "../../models/Command";
-
-interface HydrationSubscriberDocument {
-    discordId: string;
-}
 
 export const hydration: Command = {
     command:
@@ -104,7 +100,7 @@ async function remindHydrationSubscribers(client: Client) {
         // Get all subscribers for this timeslot
         const subs = await (await battieDb.collection("hydration").find().toArray()).filter(sub => currentMinuteOfDay % sub.minutes == 0)
         
-        log.info(`Reminding ${subs} to hydrate`)
+        log.info(`Reminding ${subs.length} subscribers to hydrate`)
         subs.forEach((document: Document) => {
             const userId = document.userId;
             client.users.cache.get(userId)?.send("Reminder: vergeet niet te hydrateren 🥤")

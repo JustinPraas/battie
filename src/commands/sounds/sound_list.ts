@@ -2,7 +2,6 @@ import { battieDb } from "../../process/mongodb";
 import { Command } from "../../models/Command";
 import { MessageEmbed } from "discord.js";
 import { Document } from "bson";
-import { log } from "../../process/main";
 import { BOT_MAIN_COLOR } from "../../util/constants";
 
 export const soundList: Command = {
